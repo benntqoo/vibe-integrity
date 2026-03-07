@@ -5,6 +5,30 @@
 SkillFlow SDD Toolkit is an open-source **strict Spec-Driven Development (SDD) skills bundle**.  
 It combines state-machine orchestration and gate validation to turn feature delivery into a trackable, verifiable, and releasable workflow.
 
+## LAP Version Tags
+
+- `lap-v1-strict-sdd`: baseline strict SDD workflow with mandatory heavy gates for most tasks
+- `lap-v2-adaptive-sdd`: adaptive workflow with risk-based gates and lighter exploration path
+
+## LAP v2 Differential Design
+
+LAP v2 keeps traceability and release safety from v1, but removes excessive ceremony that blocks high-speed iteration.
+
+- Context granularity upgrade: replace 2-5 minute atomic slicing with bounded vertical slices that preserve architecture context
+- Spec sync upgrade: move from manual always-on sync to checkpoint-based sync (`SpecCheckpoint`) with generated delta summary
+- Worktree policy upgrade: use risk-tier trigger, only mandatory for high-risk multi-module or parallel work
+- Gate policy upgrade: split into `Explore`, `Build`, and `Release` modes, each with different mandatory checks
+
+### v2 State Flow
+
+`Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
+
+### v2 Mode Matrix
+
+- Explore mode: local experiments, architecture notes, optional spec snapshot
+- Build mode: implementation and focused validation, checkpoint spec sync required
+- Release mode: full contract checks, traceability pass, release guard pass
+
 ## Why This Toolkit
 
 - Unified state flow: `Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`

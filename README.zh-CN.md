@@ -5,6 +5,30 @@
 SkillFlow SDD Toolkit 是一套可开源复用的 **严格 Spec-Driven Development（SDD）技能工具集**。  
 它通过状态机编排与关卡校验，把特性交付过程从“经验驱动”升级为“可追踪、可验证、可发布”。
 
+## LAP 版本标签
+
+- `lap-v1-strict-sdd`：v1 基线，默认对大多数任务采用重关卡严格流程
+- `lap-v2-adaptive-sdd`：v2 自适应，按风险分级启用关卡并保留探索轻流程
+
+## LAP v2 差异化设计
+
+LAP v2 保留 v1 的可追踪与发布安全能力，同时削减阻碍快速迭代的过重仪式。
+
+- 任务粒度升级：从 2-5 分钟原子切分，升级为保留架构上下文的有边界纵向切片
+- Spec 同步升级：从全程人工同步，升级为检查点同步（`SpecCheckpoint`）并输出差异摘要
+- Worktree 策略升级：改为风险分级触发，仅在高风险跨模块或并行开发场景强制使用
+- 关卡策略升级：拆分为 `Explore`、`Build`、`Release` 三种模式并配置不同必选校验
+
+### v2 状态流
+
+`Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
+
+### v2 模式矩阵
+
+- Explore 模式：本地探索实验、架构草图，Spec 快照可选
+- Build 模式：功能实现与聚焦验证，要求进行检查点 Spec 同步
+- Release 模式：完整契约校验、追踪通过、发布守门通过
+
 ## 为什么使用这套工具
 
 - 统一状态流转：`Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
