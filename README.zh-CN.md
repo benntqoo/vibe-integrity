@@ -23,6 +23,20 @@ LAP v2 保留 v1 的可追踪与发布安全能力，同时削减阻碍快速迭
 
 `Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
 
+### v2 状态-技能映射
+
+| 状态 | 主要技能 | 用途 |
+|------|----------|------|
+| `Ideation` | `spec-architect` | 将模糊需求转换为可执行规格 |
+| `Explore` | `spec-architect`, `spec-traceability` | 架构探索，Spec 快照可选 |
+| `SpecCheckpoint` | `spec-architect` | Spec 验证与差异摘要同步 |
+| `Build` | `spec-to-codebase`, `spec-contract-diff`, `spec-traceability` | 代码生成与聚焦验证 |
+| `Verify` | `spec-driven-test`, `spec-traceability` | 契约验证与测试覆盖 |
+| `ReleaseReady` | `sdd-release-guard` | 最终发布关卡与回滚就绪 |
+| `Released` | - | 功能已交付 |
+
+`Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
+
 ### v2 模式矩阵
 
 - Explore 模式：本地探索实验、架构草图，Spec 快照可选

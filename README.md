@@ -23,6 +23,20 @@ LAP v2 keeps traceability and release safety from v1, but removes excessive cere
 
 `Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
 
+### v2 State-Skill Mapping
+
+| State | Primary Skills | Purpose |
+|-------|----------------|--------|
+| `Ideation` | `spec-architect` | Convert fuzzy requirements to executable specs |
+| `Explore` | `spec-architect`, `spec-traceability` | Architecture exploration, optional spec snapshot |
+| `SpecCheckpoint` | `spec-architect` | Spec validation and sync with delta summary |
+| `Build` | `spec-to-codebase`, `spec-contract-diff`, `spec-traceability` | Code generation and focused validation |
+| `Verify` | `spec-driven-test`, `spec-traceability` | Contract verification and test coverage |
+| `ReleaseReady` | `sdd-release-guard` | Final release gates and rollback readiness |
+| `Released` | - | Feature delivered |
+
+`Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
+
 ### v2 Mode Matrix
 
 - Explore mode: local experiments, architecture notes, optional spec snapshot
