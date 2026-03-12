@@ -66,7 +66,7 @@ python skills/sdd-orchestrator/validate-sdd.py --fast-path true --fast-path-skip
 
 ## 为什么使用这套工具
 
-- 统一状态流转：`Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
+MB|- 统一状态流转：`Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
 - 统一产物约束：规格、契约、测试、追踪矩阵、发布守门报告
 - 统一机器校验：`validate-sdd.py` 自动检查技能一致性与关卡完整性
 - 兼容多工具目录：支持单层与多层 `skills` 结构
@@ -152,15 +152,6 @@ python skills/sdd-orchestrator/bootstrap-sdd.py add my-feature ./my-project
 python skills/sdd-orchestrator/bootstrap-sdd.py add-skills ./my-project
 ```
 
-```bash
-python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.single-layer.json
-```
-
-3) 使用多层目录模板：
-
-```bash
-python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.multi-layer.json
-```
 
 ## 示例输出
 

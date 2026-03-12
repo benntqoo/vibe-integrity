@@ -43,7 +43,7 @@ pipeline {
     
     post {
         always {
-            archiveArtifacts artifacts: 'docs/specs/**', fingerprint: true
+            QR|            archiveArtifacts artifacts: '.sdd-spec/specs/**', fingerprint: true
         }
     }
 }

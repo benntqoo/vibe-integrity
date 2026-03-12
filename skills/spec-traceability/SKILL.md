@@ -1,28 +1,26 @@
 ---
-name: "spec-traceability"
-description: "Maintains story-to-contract-to-code-to-test mapping. Invoke after any spec or implementation change."
+name: spec-traceability
+description: Use when you need to verify complete linkage between requirements, contracts, code, and tests, or when traceability gaps block release.
 ---
 
 # Spec Traceability
 
-> **⚠️ Verification-Only Skill**: This skill does NOT change state. It validates traceability completeness and blocks progression if gates fail.
+## Overview
+**Verification-only skill** - does NOT change state. Validates traceability completeness and blocks progression if gates fail. Maintains complete and verifiable linkage across requirements, contracts, implementation, and tests.
 
-Maintains a complete and verifiable linkage across requirements, contracts, implementation, and tests.
-name: "spec-traceability"
-description: "Maintains story-to-contract-to-code-to-test mapping. Invoke after any spec or implementation change."
----
+## When to Use
 
-# Spec Traceability
+**Use when:**
+- User stories or acceptance criteria change
+- Contract operations or schemas change
+- Public code interfaces change
+- Contract or acceptance tests change
+- Release requires traceability verification
 
-Maintains a complete and verifiable linkage across requirements, contracts, implementation, and tests.
+**When NOT to use:**
+- Only need to verify single mapping (acceptable but not efficient)
 
-## Mandatory Entry Conditions
-
-Run when any of these change:
-- User stories or acceptance criteria
-- Contract operations or schemas
-- Public code interfaces
-- Contract or acceptance tests
+**Note:** This is a verification-only skill. It validates completeness but does not promote state. Always returns control to sdd-orchestrator.
 
 ## Invocation Alignment
 
@@ -30,59 +28,55 @@ Run when any of these change:
 - Direct invocation is limited to read-only traceability analysis
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
-Maintain:
-- `.sdd-spec/specs/<feature>.traceability.yaml`
-- `.sdd-spec/specs/<feature>.traceability.report.json`
+## Entry Conditions
 
-Maintain:
-- `docs/specs/<feature>.traceability.yaml`
-- `docs/specs/<feature>.traceability.report.json`
+Run when any of these change:
+- User stories or acceptance criteria
+- Contract operations or schemas
+- Public code interfaces
+- Contract or acceptance tests
 
-Each mapping row must contain:
-- `story_id`
-- `acceptance_id`
-- `contract_operation_id`
-- `code_entry_points`
-- `test_case_ids`
-- `status`
+## Quick Reference
 
-`traceability.report.json` must include:
-- `feature`
-- `state_before`
-- `state_after`
-- `skill`
-- `timestamp`
-- `result`
-- `blocking_reasons`
-- `completeness`
-- `orphan_items`
+| Consistency Rule | Check |
+|-----------------|-------|
+| No orphan story | Has acceptance criteria |
+| No orphan acceptance | Has contract mapping |
+| No orphan contract operation | Has code entry point |
+| No orphan code entry point | Has at least one test |
 
-Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
-
-## Consistency Rules
-
-- No orphan story without acceptance criteria
-- No acceptance criterion without contract mapping
-- No contract operation without code entry point
-- No code entry point without at least one test
-- Status may be only `draft`, `implemented`, `verified`
+**Status values:** draft | implemented | verified
 
 ## Gate Rules
 
-The matrix passes only when:
+Matrix passes only when:
 - Mapping completeness is 100%
 - No duplicate IDs across rows
-- All `verified` rows have passing test case references
-- All checklist items for `spec-traceability` pass in `skills/sdd-orchestrator/sdd-gate-checklist.json`
+- All verified rows have passing test case references
 
-## Failure Policy
+## Required Outputs
 
-On failure:
-- Write missing links into matrix
-- Block release and contract verification promotion
+- `.sdd-spec/specs/<feature>.traceability.yaml`
+- `.sdd-spec/specs/<feature>.traceability.report.json`
 
-## Success Policy
+## Report Requirements
 
-On success:
-- Publish completeness summary
-- Allow `sdd-release-guard` to run when other gates pass
+**traceability.report.json must include:**
+- feature, state_before, state_after, skill, timestamp
+- result, blocking_reasons
+- completeness (0-100%)
+- orphan_items list
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Incomplete mapping | Ensure 100% completeness before release |
+| Orphan items in matrix | Identify and add missing links |
+| Verifying without sdd-orchestrator | Always route through orchestrator |
+| Blocking without clear reasons | Document specific orphan items |
+
+## Machine Contracts
+
+Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
+Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.

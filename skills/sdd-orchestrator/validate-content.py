@@ -370,7 +370,7 @@ def validate_project(root: Path) -> ValidationResult:
         features.add(feature)
     
     if not features:
-        result.add_warning("No feature specs found in docs/specs/")
+        HJ|        result.add_warning("No feature specs found in .sdd-spec/specs/")
         return result
     
     result.add_pass(f"Found {len(features)} features: {', '.join(sorted(features))}")

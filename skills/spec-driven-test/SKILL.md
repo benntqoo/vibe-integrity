@@ -1,25 +1,24 @@
 ---
-name: "spec-driven-test"
-description: "Builds and enforces test gates from spec contracts. Invoke after code generation and before release decisions."
+name: spec-driven-test
+description: Use when implementation exists at Build or Verify state and you need to create verification tests from spec contracts.
 ---
 
 # Spec-Driven Test
 
-Converts spec artifacts into mandatory verification suites and blocks promotion when any contract path lacks executable proof.
+## Overview
+Converts spec artifacts into mandatory verification suites. Blocks promotion when any contract path lacks executable proof.
 
-All conditions must be true:
-- Current state is `CodeGenerated` or `Implemented`
-- `.sdd-spec/specs/<feature>.contract.json` exists
-- `.sdd-spec/specs/<feature>.traceability.yaml` exists
+## When to Use
+
+**Use when:**
+- Current state is Build or Verify
+- Contract.json exists
+- Traceability.yaml exists
 - Contract diff check has passed
 
-All conditions must be true:
-- Current state is `CodeGenerated` or `Implemented`
-- `docs/specs/<feature>.contract.json` exists
-- `docs/specs/<feature>.traceability.yaml` exists
-- Contract diff check has passed
-
-If not, run `spec-contract-diff` first.
+**When NOT to use:**
+- Contract diff not yet run (run spec-contract-diff first)
+- No contract file (return to spec-architect)
 
 ## Invocation Alignment
 
@@ -27,68 +26,68 @@ If not, run `spec-contract-diff` first.
 - Direct invocation is limited to read-only test planning or gap analysis
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
-## State Transition Contract
+## State Transition
 
-- Input state: `CodeGenerated` or `Implemented`
-- Output state on success: `ContractVerified`
-- Output state on failure: `Implemented`
+| Input State | Success | Failure |
+|-------------|---------|---------|
+| Build/Verify | Verify | Build |
 
-Produce:
+## Entry Conditions (All Must Be True)
+
+1. Current state is `Build` or `Verify`
+2. `.sdd-spec/specs/<feature>.contract.json` exists
+3. `.sdd-spec/specs/<feature>.traceability.yaml` exists
+4. Contract diff check has passed
+
+## Quick Reference
+
+| Gate Check | Coverage Required |
+|------------|-------------------|
+| Traceability | 100% for stories and acceptance |
+| Contract Operations | 100% coverage |
+| Error Codes | 100% coverage |
+| Flaky Markers | None allowed |
+| Test Result | Must be pass |
+
+## Test Construction Rules
+
+- One acceptance criterion → at least one executable test
+- One contract operation → success test AND failure test
+- Each error code → at least one assertion
+- Tests verify runtime behavior through public interfaces only
+- External dependencies may be isolated, business logic cannot be replaced
+
+## Required Outputs
+
 - `.sdd-spec/tests/specs/<feature>.contract.spec.*`
 - `.sdd-spec/tests/specs/<feature>.acceptance.spec.*`
 - `.sdd-spec/specs/<feature>.test.report.json`
 
-Produce:
-- `tests/specs/<feature>.contract.spec.*`
-- `tests/specs/<feature>.acceptance.spec.*`
-- `docs/specs/<feature>.test.report.json`
+## Failure Policy
 
-`test.report.json` must include:
-- `feature`
-- `state_before`
-- `state_after`
-- `skill`
-- `timestamp`
-- `result`
-- `blocking_reasons`
-- `coverage_summary`
-- `failed_ids`
-
-Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
-
-## Test Construction Rules
-
-- One acceptance criterion maps to at least one executable test
-- One contract operation maps to at least one success test and one failure test
-- Each documented error code maps to at least one assertion
-- Tests verify runtime behavior through public interfaces only
-- External dependencies may be isolated, but business logic cannot be replaced
-
-## Gate Checks
-
-All must pass:
-- Traceability coverage for stories and acceptance criteria is 100%
-- Contract operation coverage is 100%
-- Error code coverage is 100%
-- No flaky test markers remain
-- Test report marks overall result as `pass`
-- All checklist items for `spec-driven-test` pass in `skills/sdd-orchestrator/sdd-gate-checklist.json`
-
-On any failure:
-- Emit `.sdd-spec/specs/<feature>.test.report.json` with failed IDs
-- Keep state at `Implemented`
-- Block release guard invocation
-
-On any failure:
-- Emit `docs/specs/<feature>.test.report.json` with failed IDs
-- Keep state at `Implemented`
+**On failure:**
+- Emit test.report.json with failed IDs
+- Keep state at Build
 - Block release guard invocation
 
 ## Handoff Contract
 
-When successful:
-- Emit target state `ContractVerified`
+**When successful:**
+- Emit target state `Verify`
 - Publish test report path
 - Publish coverage summary
+- Next skill: sdd-release-guard
 
-The next required skill is `sdd-release-guard`.
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Missing failure tests | Create both success and failure test cases |
+| Only testing happy path | Cover all error scenarios defined in contract |
+| Isolating business logic | Test through public interfaces, don't mock business logic |
+| Not covering error codes | 100% error code coverage required |
+
+## Machine Contracts
+
+Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
+Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.

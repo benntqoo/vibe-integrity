@@ -1,99 +1,91 @@
 ---
-name: "sdd-orchestrator"
-description: "Coordinates strict SDD state transitions and gate checks. Invoke as the only entry point for feature delivery."
+name: sdd-orchestrator
+description: Use when coordinating feature delivery with strict SDD state transitions, gate validation, and requirement for single entry point control.
 ---
 
 # SDD Orchestrator
 
-This skill is the single controller for strict SDD execution.
+## Overview
+Single controller for strict Spec-Driven Development (SDD) execution. Enforces one-way, auditable, and recoverable feature progression through mandatory state transitions and gate checks.
 
-## Mission
+## When to Use
 
-Enforce one-way, auditable, and recoverable feature progression:
-`Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
+**Use when:**
+- Starting any new feature delivery workflow
+- Managing feature state across SDD lifecycle
+- Enforcing gate validation before state promotion
+- Requiring auditable state transition history
 
-## Invocation Policy
+**When NOT to use:**
+- Ad-hoc feature implementation without SDD workflow
+- Simple documentation updates (use fast-path mode)
+
+## Invocation Alignment
 
 - Always invoke this skill first for any feature change
 - Other SDD skills must run only when directed by this skill
 - Direct invocation of downstream skills without matching state is invalid
 
-## Canonical Enums
+## State Flow
 
-- `state`: `Ideation` | `SpecDraft` | `SpecValidated` | `CodeGenerated` | `Implemented` | `ContractVerified` | `Released`
-- `result`: `pass` | `fail` | `blocked`
-- `compatibility_mode`: `backward` | `forward` | `strict`
-
-## Machine Contracts
-
-- Schema file: `skills/sdd-orchestrator/sdd-machine-schema.json`
-- Gate checklist: `skills/sdd-orchestrator/sdd-gate-checklist.json`
-- Validation command: `python skills/sdd-orchestrator/validate-sdd.py`
-- Configurable command: `python skills/sdd-orchestrator/validate-sdd.py --skills-path <skills_path1> --skills-path <skills_path2> --recursive-search true --config <config.json>`
-- Single-layer template: `skills/sdd-orchestrator/validate-sdd.config.single-layer.json`
-- Multi-layer template: `skills/sdd-orchestrator/validate-sdd.config.multi-layer.json`
-- All SDD skills must follow these machine-readable definitions
-
-## Required Inputs
-
-- Feature identifier
-- Current state record
-- Existing spec artifacts for that feature, if any
-
-Track feature state in:
-- `.sdd-spec/specs/<feature>.state.json`
-
-Track feature state in:
-- `docs/specs/<feature>.state.json`
-
-Minimum schema:
-- `feature`
-- `current_state`
-- `last_gate`
-- `last_skill`
-- `updated_at`
-- `result`
-- `blocked_reason`
-- `artifacts`
+```
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+```
 
 ## Routing Rules
 
-> **Note**: `spec-traceability` is a **verification-only skill** - it does NOT change state. It validates completeness and blocks progression if gates fail.
+| Current State | Call Skill | Purpose |
+|---------------|------------|---------|
+| Ideation/Explore | `spec-architect` | Create spec and contracts |
+| SpecCheckpoint | `spec-to-codebase` | Generate implementation |
+| Build | `spec-contract-diff` | Detect contract drift |
+| Build/Verify | `spec-driven-test` | Run verification tests |
+| Verify | `sdd-release-guard` | Final release gates |
 
-- If state is `Ideation` or `SpecDraft`, call `spec-architect`
-- After spec creation or update, call `spec-traceability` (verification only, no state change)
-- If state is `SpecValidated`, call `spec-to-codebase`
-- After code generation, call `spec-traceability` (verification only, no state change)
-- If state is `CodeGenerated` or `Implemented`, call `spec-contract-diff`
-- If diff passes, call `spec-driven-test`
-- After test generation or update, call `spec-traceability` (verification only, no state change)
-- If tests pass and state becomes `ContractVerified`, call `sdd-release-guard`
+**Note:** Call `spec-traceability` after any spec/code/test changes (verification only, no state change).
 
-- If state is `Ideation` or `SpecDraft`, call `spec-architect`
-- After spec creation or update, call `spec-traceability`
-- If state is `SpecValidated`, call `spec-to-codebase`
-- After code generation, call `spec-traceability`
-- If state is `CodeGenerated` or `Implemented`, call `spec-contract-diff`
-- If diff passes, call `spec-driven-test`
-- After test generation or update, call `spec-traceability`
-- If tests pass and state becomes `ContractVerified`, call `sdd-release-guard`
+## Canonical Enums
+
+- **State:** Ideation | Explore | SpecCheckpoint | Build | Verify | ReleaseReady | Released
+- **Result:** pass | fail | blocked
+- **Compatibility Mode:** backward | forward | strict
+
+## Quick Reference
+
+| Action | Command/Method |
+|--------|----------------|
+| Validate workflow | `python skills/sdd-orchestrator/validate-sdd.py` |
+| Track state | `.sdd-spec/specs/<feature>.state.json` |
+| Schema | `skills/sdd-orchestrator/sdd-machine-schema.json` |
+| Gate checklist | `skills/sdd-orchestrator/sdd-gate-checklist.json` |
 
 ## Gate Governance
 
-- Never skip failed gates
-- Never downgrade compatibility claims silently
-- Never promote state without output artifacts
-- Always persist block reasons in the state record
+**Never:**
+- Skip failed gates
+- Downgrade compatibility claims silently
+- Promote state without output artifacts
+
+**Always:**
+- Persist block reasons in state record
 
 ## Recovery Rules
 
-- If a skill fails, remain in current valid state
-- If contracts change, force return to `SpecDraft`
-- If tests fail, set state to `Implemented` with failed IDs
+- If skill fails → remain in current valid state
+- If contracts change → force return to Explore
+- If tests fail → set state to Build with failed IDs
 
-## Completion Rule
+## Common Mistakes
 
-Delivery is complete only when:
-- State is `Released`
-- Release guard report exists
-- Traceability matrix is complete
+| Mistake | Fix |
+|---------|-----|
+| Direct invocation of downstream skills without orchestrator | Always invoke through sdd-orchestrator |
+| Skipping failed gates to proceed | Never skip; fix root cause first |
+| Promoting state without artifacts | Ensure all required_outputs exist before promotion |
+| Silently changing compatibility mode | Document any changes in contract |
+
+## Machine Contracts
+
+- Schema: `skills/sdd-orchestrator/sdd-machine-schema.json`
+- Checklist: `skills/sdd-orchestrator/sdd-gate-checklist.json`
+- Validation: `python skills/sdd-orchestrator/validate-sdd.py`

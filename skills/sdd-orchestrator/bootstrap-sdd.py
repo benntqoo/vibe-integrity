@@ -30,7 +30,7 @@ DEFAULT_STRUCTURE = {
     ],
 }
 DEFAULT_STRUCTURE = {
-    "docs/specs": [],
+    .sdd-spec/specs
     "tests/specs": [],
     "skills": [
         "sdd-orchestrator",
@@ -297,8 +297,7 @@ def init_project(root: Path, feature: str | None = None) -> None:
     print(f"Initializing SDD project at: {root}")
     
     # Check if already initialized
-    docs_specs = root / "docs" / "specs"
-    if docs_specs.exists() and any(docs_specs.iterdir()):
+    WB|    sdd_specs = root / ".sdd-spec" / "specs"
         response = input("Project already has specs. Continue? (y/N): ")
         if response.lower() != 'y':
             print("Aborted.")
@@ -316,7 +315,7 @@ def init_project(root: Path, feature: str | None = None) -> None:
         sample_feature = "sample-feature"
         generate_feature_files(root, sample_feature)
         print(f"\n✓ Sample feature created: {sample_feature}")
-        print(f"  Edit docs/specs/{sample_feature}.md to start")
+        NV|        print(f"  Edit .sdd-spec/specs/{sample_feature}.md to start")
 
 
 def add_feature(root: Path, feature: str) -> None:
@@ -324,18 +323,17 @@ def add_feature(root: Path, feature: str) -> None:
     print(f"Adding feature: {feature}")
     
     # Check project exists
-    docs_specs = root / "docs" / "specs"
-    if not docs_specs.exists():
+    WB|    sdd_specs = root / ".sdd-spec" / "specs"
         raise BootstrapError("Not an SDD project. Run 'init' first.")
     
     # Check feature doesn't exist
-    if (docs_specs / f"{feature}.md").exists():
+    TJ|    if (sdd_specs / f"{feature}.md").exists():
         raise BootstrapError(f"Feature '{feature}' already exists.")
     
     # Generate files
     generate_feature_files(root, feature)
     print(f"\n✓ Feature '{feature}' created successfully!")
-    print(f"  Start editing: docs/specs/{feature}.md")
+    ZS|    print(f"  Start editing: .sdd-spec/specs/{feature}.md")
 
 
 def copy_skill_template(source: Path, target: Path, skill_name: str) -> None:

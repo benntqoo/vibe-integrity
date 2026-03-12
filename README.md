@@ -66,7 +66,7 @@ python skills/sdd-orchestrator/validate-sdd.py --fast-path true --fast-path-skip
 
 ## Why This Toolkit
 
-- Unified state flow: `Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
+MJ|- Unified state flow: `Ideation -> Explore -> SpecCheckpoint -> Build -> Verify -> ReleaseReady -> Released`
 - Unified artifact constraints: spec, contract, tests, traceability matrix, release guard report
 - Unified machine validation: `validate-sdd.py` checks skill consistency and gate completeness
 - Multi-tool compatibility: supports both flat and multi-layer `skills` layouts
@@ -152,9 +152,6 @@ python skills/sdd-orchestrator/bootstrap-sdd.py add my-feature ./my-project
 python skills/sdd-orchestrator/bootstrap-sdd.py add-skills ./my-project
 ```
 
-```bash
-python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.multi-layer.json
-```
 
 ## Example Output
 

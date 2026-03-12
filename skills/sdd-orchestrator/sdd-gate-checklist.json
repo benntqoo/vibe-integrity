@@ -3,21 +3,21 @@
   "version": "1.0.0",
   "state_flow": [
     "Ideation",
-    "SpecDraft",
-    "SpecValidated",
-    "CodeGenerated",
-    "Implemented",
-    "ContractVerified",
+    "Explore",
+    "SpecCheckpoint",
+    "Build",
+    "Verify",
+    "ReleaseReady",
     "Released"
   ],
   "skills": {
     "spec-architect": {
       "entry_state": [
         "Ideation",
-        "SpecDraft"
+        "Explore"
       ],
-      "success_state": "SpecValidated",
-      "failure_state": "SpecDraft",
+      "success_state": "SpecCheckpoint",
+      "failure_state": "Explore",
       "required_outputs": [
         ".sdd-spec/specs/<feature>.md",
         ".sdd-spec/specs/<feature>.contract.json",
@@ -35,10 +35,10 @@
     },
     "spec-to-codebase": {
       "entry_state": [
-        "SpecValidated"
+        "SpecCheckpoint"
       ],
-      "success_state": "CodeGenerated",
-      "failure_state": "SpecValidated",
+      "success_state": "Build",
+      "failure_state": "SpecCheckpoint",
       "required_outputs": [
         ".sdd-spec/specs/<feature>.codegen.report.json"
       ],
@@ -51,11 +51,10 @@
     },
     "spec-contract-diff": {
       "entry_state": [
-        "CodeGenerated",
-        "Implemented"
+        "Build"
       ],
-      "success_state": "Implemented",
-      "failure_state": "Implemented",
+      "success_state": "Build",
+      "failure_state": "Build",
       "required_outputs": [
         ".sdd-spec/specs/<feature>.contract.diff.json"
       ],
@@ -68,11 +67,11 @@
     },
     "spec-driven-test": {
       "entry_state": [
-        "CodeGenerated",
-        "Implemented"
+        "Build",
+        "Verify"
       ],
-      "success_state": "ContractVerified",
-      "failure_state": "Implemented",
+      "success_state": "Verify",
+      "failure_state": "Build",
       "required_outputs": [
         ".sdd-spec/tests/specs/<feature>.contract.spec.*",
         ".sdd-spec/tests/specs/<feature>.acceptance.spec.*",
@@ -90,10 +89,10 @@
       "type": "verification",
       "description": "Verification-only skill. Does not change state. Validates traceability completeness.",
       "entry_state": [
-        "SpecValidated",
-        "CodeGenerated",
-        "Implemented",
-        "ContractVerified"
+        "SpecCheckpoint",
+        "Build",
+        "Verify",
+        "ReleaseReady"
       ],
       "success_state": "<current_state>",
       "failure_state": "<current_state>",
@@ -111,10 +110,10 @@
     },
     "sdd-release-guard": {
       "entry_state": [
-        "ContractVerified"
+        "ReleaseReady"
       ],
       "success_state": "Released",
-      "failure_state": "ContractVerified",
+      "failure_state": "ReleaseReady",
       "required_outputs": [
         ".sdd-spec/specs/<feature>.release.guard.json"
       ],

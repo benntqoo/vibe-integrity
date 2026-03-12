@@ -137,7 +137,6 @@ def main() -> None:
     parser.add_argument("--validate-content", choices=["true", "false"], 
                        help="Also validate artifact content quality")
     args = parser.parse_args()
-    args = parser.parse_args()
 
     config_path = Path(args.config).resolve() if args.config else None
     config = load_config(config_path)
