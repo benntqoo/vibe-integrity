@@ -6,3 +6,13 @@ __pycache__/
 *.log
 .DS_Store
 Thumbs.db
+
+# SDD Spec artifacts
+.sdd-spec/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.log
+.DS_Store
+Thumbs.db

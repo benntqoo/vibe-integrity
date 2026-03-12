@@ -19,11 +19,11 @@
       "success_state": "SpecValidated",
       "failure_state": "SpecDraft",
       "required_outputs": [
-        "docs/specs/<feature>.md",
-        "docs/specs/<feature>.contract.json",
-        "docs/specs/<feature>.traceability.yaml",
-        "docs/specs/<feature>.risk.yaml",
-        "docs/specs/<feature>.spec.report.json"
+        ".sdd-spec/specs/<feature>.md",
+        ".sdd-spec/specs/<feature>.contract.json",
+        ".sdd-spec/specs/<feature>.traceability.yaml",
+        ".sdd-spec/specs/<feature>.risk.yaml",
+        ".sdd-spec/specs/<feature>.spec.report.json"
       ],
       "gate_checks": [
         "story_to_acceptance_complete",
@@ -40,7 +40,7 @@
       "success_state": "CodeGenerated",
       "failure_state": "SpecValidated",
       "required_outputs": [
-        "docs/specs/<feature>.codegen.report.json"
+        ".sdd-spec/specs/<feature>.codegen.report.json"
       ],
       "gate_checks": [
         "all_contract_operations_mapped",
@@ -57,7 +57,7 @@
       "success_state": "Implemented",
       "failure_state": "Implemented",
       "required_outputs": [
-        "docs/specs/<feature>.contract.diff.json"
+        ".sdd-spec/specs/<feature>.contract.diff.json"
       ],
       "gate_checks": [
         "no_undeclared_removed_operation",
@@ -74,9 +74,9 @@
       "success_state": "ContractVerified",
       "failure_state": "Implemented",
       "required_outputs": [
-        "tests/specs/<feature>.contract.spec.*",
-        "tests/specs/<feature>.acceptance.spec.*",
-        "docs/specs/<feature>.test.report.json"
+        ".sdd-spec/tests/specs/<feature>.contract.spec.*",
+        ".sdd-spec/tests/specs/<feature>.acceptance.spec.*",
+        ".sdd-spec/specs/<feature>.test.report.json"
       ],
       "gate_checks": [
         "traceability_coverage_100",
@@ -96,8 +96,8 @@
       "success_state": "Implemented",
       "failure_state": "Implemented",
       "required_outputs": [
-        "docs/specs/<feature>.traceability.yaml",
-        "docs/specs/<feature>.traceability.report.json"
+        ".sdd-spec/specs/<feature>.traceability.yaml",
+        ".sdd-spec/specs/<feature>.traceability.report.json"
       ],
       "gate_checks": [
         "no_orphan_story",
@@ -114,7 +114,7 @@
       "success_state": "Released",
       "failure_state": "ContractVerified",
       "required_outputs": [
-        "docs/specs/<feature>.release.guard.json"
+        ".sdd-spec/specs/<feature>.release.guard.json"
       ],
       "gate_checks": [
         "contract_diff_pass",

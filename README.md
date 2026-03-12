@@ -43,6 +43,27 @@ LAP v2 keeps traceability and release safety from v1, but removes excessive cere
 - Build mode: implementation and focused validation, checkpoint spec sync required
 - Release mode: full contract checks, traceability pass, release guard pass
 
+### Fast Path Mode
+
+For simple requirements (config changes, documentation, bug fixes), SDD-Spec Skills supports a **fast path** mode that skips non-essential gates:
+
+```bash
+# Use fast path config template
+python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.fast-path.json
+
+# Or via CLI
+python skills/sdd-orchestrator/validate-sdd.py --fast-path true --fast-path-skips spec-traceability spec-contract-diff
+```
+
+**Fast Path Characteristics:**
+
+| Feature | Standard Mode | Fast Path |
+|---------|--------------|-----------|
+| Required skills | 6 skills | 4 skills (min) |
+| Traceability | Mandatory | Optional |
+| Contract diff | Required | Optional |
+| Gate checks | Full | Minimal |
+
 ## Why This Toolkit
 
 - Unified state flow: `Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
@@ -59,6 +80,26 @@ LAP v2 keeps traceability and release safety from v1, but removes excessive cere
 - `spec-driven-test`: spec-based testing gate
 - `spec-traceability`: requirement-contract-code-test traceability
 - `sdd-release-guard`: final pre-release gate
+
+## Artifact Storage
+
+All SDD artifacts are stored in the `.sdd-spec` directory to keep them separate from project code:
+
+```text
+.sdd-spec/
+  specs/              # Spec, contract, traceability files
+    <feature>.md
+    <feature>.contract.json
+    <feature>.traceability.yaml
+    <feature>.state.json
+    ...
+  tests/specs/       # Test files
+    <feature>.contract.spec.*
+    <feature>.acceptance.spec.*
+    ...
+```
+
+> **Note**: The `.sdd-spec` directory is automatically ignored by version control (via `.gitignore`).
 
 ## Directory Layout
 
@@ -93,6 +134,23 @@ python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/
 ```
 
 3) Use the multi-layer template:
+
+```bash
+python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.multi-layer.json
+```
+
+4) Initialize a new project with bootstrap tool:
+
+```bash
+# Create new project structure
+python skills/sdd-orchestrator/bootstrap-sdd.py init ./my-project
+
+# Add a new feature
+python skills/sdd-orchestrator/bootstrap-sdd.py add my-feature ./my-project
+
+# Add skills directory
+python skills/sdd-orchestrator/bootstrap-sdd.py add-skills ./my-project
+```
 
 ```bash
 python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.multi-layer.json

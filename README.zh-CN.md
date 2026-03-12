@@ -43,6 +43,27 @@ LAP v2 保留 v1 的可追踪与发布安全能力，同时削减阻碍快速迭
 - Build 模式：功能实现与聚焦验证，要求进行检查点 Spec 同步
 - Release 模式：完整契约校验、追踪通过、发布守门通过
 
+### 快速路径模式
+
+对于简单需求（配置变更、文档修复、Bug 修复），SDD-Spec Skills 支持**快速路径**模式，跳过非必要关卡：
+
+```bash
+# 使用快速路径配置模板
+python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.fast-path.json
+
+# 或通过命令行
+python skills/sdd-orchestrator/validate-sdd.py --fast-path true --fast-path-skips spec-traceability spec-contract-diff
+```
+
+**快速路径特性：**
+
+| 特性 | 标准模式 | 快速路径 |
+|------|----------|----------|
+| 必需技能 | 6 个 | 4 个（最低）|
+| 追踪矩阵 | 强制 | 可选 |
+| 契约差异 | 必需 | 可选 |
+| 关卡检查 | 完整 | 简化 |
+
 ## 为什么使用这套工具
 
 - 统一状态流转：`Ideation -> SpecDraft -> SpecValidated -> CodeGenerated -> Implemented -> ContractVerified -> Released`
@@ -59,6 +80,26 @@ LAP v2 保留 v1 的可追踪与发布安全能力，同时削减阻碍快速迭
 - `spec-driven-test`：基于规格的测试关卡
 - `spec-traceability`：需求-契约-代码-测试追踪
 - `sdd-release-guard`：发布前最终守门
+
+## 产物存储
+
+所有 SDD 产物统一存储在 `.sdd-spec` 目录下，与项目代码分离：
+
+```text
+.sdd-spec/
+  specs/              # 规格、契约、追踪文件
+    <feature>.md
+    <feature>.contract.json
+    <feature>.traceability.yaml
+    <feature>.state.json
+    ...
+  tests/specs/       # 测试文件
+    <feature>.contract.spec.*
+    <feature>.acceptance.spec.*
+    ...
+```
+
+> **注意**：`.sdd-spec` 目录已通过 `.gitignore` 自动忽略版本控制。
 
 ## 目录结构
 
@@ -87,6 +128,29 @@ python skills/sdd-orchestrator/validate-sdd.py
 ```
 
 2) 使用单层目录模板：
+
+```bash
+python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.single-layer.json
+```
+
+3) 使用多层目录模板：
+
+```bash
+python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.multi-layer.json
+```
+
+4) 使用初始化工具创建新项目：
+
+```bash
+# 创建新项目结构
+python skills/sdd-orchestrator/bootstrap-sdd.py init ./my-project
+
+# 添加新功能
+python skills/sdd-orchestrator/bootstrap-sdd.py add my-feature ./my-project
+
+# 添加 skills 目录
+python skills/sdd-orchestrator/bootstrap-sdd.py add-skills ./my-project
+```
 
 ```bash
 python skills/sdd-orchestrator/validate-sdd.py --config skills/sdd-orchestrator/validate-sdd.config.single-layer.json

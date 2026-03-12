@@ -1,0 +1,47 @@
+name: SDD Validation
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Validate SDD Skills
+        run: |
+          python skills/sdd-orchestrator/validate-sdd.py
+      
+      - name: Validate Content Quality
+        run: |
+          python skills/sdd-orchestrator/validate-sdd.py --validate-content true
+        continue-on-error: true
+
+  fast-path:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.head_commit.message, '[fast-path]') ||
+      contains(github.event.pull_request.title, '[fast-path]')
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Run Fast Path Validation
+        run: |
+          python skills/sdd-orchestrator/validate-sdd.py \
+            --config skills/sdd-orchestrator/validate-sdd.config.fast-path.json
