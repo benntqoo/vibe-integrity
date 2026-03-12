@@ -87,14 +87,16 @@
       ]
     },
     "spec-traceability": {
+      "type": "verification",
+      "description": "Verification-only skill. Does not change state. Validates traceability completeness.",
       "entry_state": [
         "SpecValidated",
         "CodeGenerated",
         "Implemented",
         "ContractVerified"
       ],
-      "success_state": "Implemented",
-      "failure_state": "Implemented",
+      "success_state": "<current_state>",
+      "failure_state": "<current_state>",
       "required_outputs": [
         ".sdd-spec/specs/<feature>.traceability.yaml",
         ".sdd-spec/specs/<feature>.traceability.report.json"

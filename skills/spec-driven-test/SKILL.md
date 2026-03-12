@@ -7,7 +7,11 @@ description: "Builds and enforces test gates from spec contracts. Invoke after c
 
 Converts spec artifacts into mandatory verification suites and blocks promotion when any contract path lacks executable proof.
 
-## Mandatory Entry Conditions
+All conditions must be true:
+- Current state is `CodeGenerated` or `Implemented`
+- `.sdd-spec/specs/<feature>.contract.json` exists
+- `.sdd-spec/specs/<feature>.traceability.yaml` exists
+- Contract diff check has passed
 
 All conditions must be true:
 - Current state is `CodeGenerated` or `Implemented`
@@ -29,7 +33,10 @@ If not, run `spec-contract-diff` first.
 - Output state on success: `ContractVerified`
 - Output state on failure: `Implemented`
 
-## Required Test Outputs
+Produce:
+- `.sdd-spec/tests/specs/<feature>.contract.spec.*`
+- `.sdd-spec/tests/specs/<feature>.acceptance.spec.*`
+- `.sdd-spec/specs/<feature>.test.report.json`
 
 Produce:
 - `tests/specs/<feature>.contract.spec.*`
@@ -67,7 +74,10 @@ All must pass:
 - Test report marks overall result as `pass`
 - All checklist items for `spec-driven-test` pass in `skills/sdd-orchestrator/sdd-gate-checklist.json`
 
-## Failure Handling
+On any failure:
+- Emit `.sdd-spec/specs/<feature>.test.report.json` with failed IDs
+- Keep state at `Implemented`
+- Block release guard invocation
 
 On any failure:
 - Emit `docs/specs/<feature>.test.report.json` with failed IDs

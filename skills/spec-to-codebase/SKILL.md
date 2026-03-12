@@ -7,7 +7,11 @@ description: "Generates implementation from validated spec contracts. Invoke onl
 
 Builds deterministic code changes from spec artifacts and enforces contract-preserving generation.
 
-## Mandatory Entry Conditions
+All conditions must be true:
+- Current state is `SpecValidated`
+- `.sdd-spec/specs/<feature>.contract.json` exists
+- `breaking_change` policy in contract is explicit
+- Traceability file exists and contains story IDs
 
 All conditions must be true:
 - Current state is `SpecValidated`
@@ -29,7 +33,10 @@ If any condition fails, stop and return to `spec-architect`.
 - Output state on success: `CodeGenerated`
 - Output state on failure: `SpecValidated`
 
-## Generation Rules
+1. Read these inputs as source of truth:
+   - `.sdd-spec/specs/<feature>.md`
+   - `.sdd-spec/specs/<feature>.contract.json`
+   - `.sdd-spec/specs/<feature>.traceability.yaml`
 
 1. Read these inputs as source of truth:
    - `docs/specs/<feature>.md`
@@ -48,7 +55,9 @@ If any condition fails, stop and return to `spec-architect`.
 - Never generate mock or fake business data in production path
 - Never bypass existing project lint/type rules
 
-## Required Outputs
+Produce all artifacts:
+- Updated implementation files aligned with contract operations
+- `.sdd-spec/specs/<feature>.codegen.report.json`
 
 Produce all artifacts:
 - Updated implementation files aligned with contract operations

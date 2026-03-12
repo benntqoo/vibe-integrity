@@ -7,7 +7,9 @@ description: "Detects drift between implemented interfaces and spec contracts. I
 
 Prevents silent contract drift by comparing spec contracts and actual public interfaces.
 
-## Mandatory Entry Conditions
+All conditions must be true:
+- Current state is `CodeGenerated` or `Implemented`
+- `.sdd-spec/specs/<feature>.contract.json` exists
 
 - Current state is `CodeGenerated` or `Implemented`
 - `docs/specs/<feature>.contract.json` exists
@@ -19,6 +21,9 @@ Prevents silent contract drift by comparing spec contracts and actual public int
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
 ## Outputs
+
+Generate:
+- `.sdd-spec/specs/<feature>.contract.diff.json`
 
 Generate:
 - `docs/specs/<feature>.contract.diff.json`

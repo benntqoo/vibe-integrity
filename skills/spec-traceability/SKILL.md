@@ -5,6 +5,15 @@ description: "Maintains story-to-contract-to-code-to-test mapping. Invoke after 
 
 # Spec Traceability
 
+> **⚠️ Verification-Only Skill**: This skill does NOT change state. It validates traceability completeness and blocks progression if gates fail.
+
+Maintains a complete and verifiable linkage across requirements, contracts, implementation, and tests.
+name: "spec-traceability"
+description: "Maintains story-to-contract-to-code-to-test mapping. Invoke after any spec or implementation change."
+---
+
+# Spec Traceability
+
 Maintains a complete and verifiable linkage across requirements, contracts, implementation, and tests.
 
 ## Mandatory Entry Conditions
@@ -21,7 +30,9 @@ Run when any of these change:
 - Direct invocation is limited to read-only traceability analysis
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
-## Required Artifact
+Maintain:
+- `.sdd-spec/specs/<feature>.traceability.yaml`
+- `.sdd-spec/specs/<feature>.traceability.report.json`
 
 Maintain:
 - `docs/specs/<feature>.traceability.yaml`

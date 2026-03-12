@@ -21,7 +21,8 @@ All must be true:
 - Direct invocation is limited to read-only release-readiness analysis
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
-## Required Output
+Generate:
+- `.sdd-spec/specs/<feature>.release.guard.json`
 
 Generate:
 - `docs/specs/<feature>.release.guard.json`

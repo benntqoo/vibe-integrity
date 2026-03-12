@@ -21,7 +21,12 @@ Run this skill only when at least one is true:
 - Direct invocation is limited to read-only analysis or refinement planning
 - Direct invocation must not promote state; control returns to `sdd-orchestrator`
 
-## Mandatory Outputs
+Produce all artifacts in one pass:
+- `.sdd-spec/specs/<feature>.md`
+- `.sdd-spec/specs/<feature>.contract.json`
+- `.sdd-spec/specs/<feature>.traceability.yaml`
+- `.sdd-spec/specs/<feature>.risk.yaml`
+- `.sdd-spec/specs/<feature>.spec.report.json`
 
 Produce all artifacts in one pass:
 - `docs/specs/<feature>.md`
@@ -38,7 +43,7 @@ If any output is missing, the state remains `SpecDraft` and code generation is b
 - Output state on success: `SpecValidated`
 - Output state on failure: `SpecDraft`
 
-## Spec Requirements
+`.sdd-spec/specs/<feature>.md` must include:
 
 `docs/specs/<feature>.md` must include:
 1. Objective and scope boundaries
@@ -50,7 +55,7 @@ If any output is missing, the state remains `SpecDraft` and code generation is b
 7. Backward compatibility commitments
 8. Rollback and feature-flag strategy
 
-## Contract File Requirements
+`.sdd-spec/specs/<feature>.contract.json` must include:
 
 `docs/specs/<feature>.contract.json` must include:
 - Contract version
@@ -59,7 +64,7 @@ If any output is missing, the state remains `SpecDraft` and code generation is b
 - Compatibility mode (`backward`, `forward`, `strict`)
 - Breaking change indicator
 
-## Report Schema
+`.sdd-spec/specs/<feature>.spec.report.json` must include:
 
 `docs/specs/<feature>.spec.report.json` must include:
 - `feature`

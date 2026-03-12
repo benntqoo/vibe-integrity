@@ -40,7 +40,8 @@ Enforce one-way, auditable, and recoverable feature progression:
 - Current state record
 - Existing spec artifacts for that feature, if any
 
-## Required State Record
+Track feature state in:
+- `.sdd-spec/specs/<feature>.state.json`
 
 Track feature state in:
 - `docs/specs/<feature>.state.json`
@@ -56,6 +57,17 @@ Minimum schema:
 - `artifacts`
 
 ## Routing Rules
+
+> **Note**: `spec-traceability` is a **verification-only skill** - it does NOT change state. It validates completeness and blocks progression if gates fail.
+
+- If state is `Ideation` or `SpecDraft`, call `spec-architect`
+- After spec creation or update, call `spec-traceability` (verification only, no state change)
+- If state is `SpecValidated`, call `spec-to-codebase`
+- After code generation, call `spec-traceability` (verification only, no state change)
+- If state is `CodeGenerated` or `Implemented`, call `spec-contract-diff`
+- If diff passes, call `spec-driven-test`
+- After test generation or update, call `spec-traceability` (verification only, no state change)
+- If tests pass and state becomes `ContractVerified`, call `sdd-release-guard`
 
 - If state is `Ideation` or `SpecDraft`, call `spec-architect`
 - After spec creation or update, call `spec-traceability`
