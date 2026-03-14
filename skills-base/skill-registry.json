@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-registry",
+  "version": "1.0.0",
+  "description": "Unified skill registry for skills-base and skills-sdd",
+  "categories": {
+    "completion-guard": "Skills that verify AI completion claims",
+    "architecture-memory": "Skills that maintain project knowledge",
+    "sdd-workflow": "Skills for Spec-Driven Development workflow",
+    "debugging": "Skills for systematic debugging",
+    "validation": "Skills for validation and testing"
+  },
+  "skills": [
+    {
+      "id": "vibe-guard",
+      "name": "vibe-guard",
+      "category": "completion-guard",
+      "description": "AI completion integrity checker - detects false completion claims, TODO placeholders, fake tests, and ensures code is executable",
+      "implementation": "skills-base/vibe-guard/validate-vibe-guard.py",
+      "config_file": "skills-base/vibe-guard/vibe-guard.config.json",
+      "entry_points": ["--check", "--mode", "--category"],
+      "dependencies": [],
+      "outputs": [
+        ".sdd-spec/vibe-guard-report.json"
+      ],
+      "modes": ["vibe", "standard", "strict"],
+      "auto_trigger": true,
+      "trigger_phrases": ["done", "ready", "complete", "finished", "完成", "完成了"]
+    },
+    {
+      "id": "vibe-design",
+      "name": "vibe-design",
+      "category": "architecture-memory",
+      "description": "AI-assisted requirement clarification and design helper that automatically updates project architecture memory",
+      "implementation": "skills-base/vibe-design/vibe-design.py",
+      "config_file": null,
+      "entry_points": ["--clarify", "--interactive", "--topic"],
+      "dependencies": ["vibe-integrity-writer"],
+      "outputs": [
+        ".vibe-integrity/tech-records.yaml",
+        ".vibe-integrity/dependency-graph.yaml",
+        ".vibe-integrity/schema-evolution.yaml",
+        "docs/plans/*-design.md"
+      ],
+      "modes": ["interactive", "batch"],
+      "auto_trigger": false
+    },
+    {
+      "id": "vibe-integrity-debug",
+      "name": "vibe-integrity-debug",
+      "category": "debugging",
+      "description": "Systematic debugging helper that ensures root cause analysis before fixes",
+      "implementation": "skills-base/vibe-integrity-debug/vibe_integrity_debug.py",
+      "config_file": null,
+      "entry_points": ["--analyze", "--issue", "--phase"],
+      "dependencies": ["vibe-integrity-writer"],
+      "outputs": [
+        ".vibe-integrity/risk-zones.yaml",
+        ".vibe-integrity/tech-records.yaml"
+      ],
+      "phases": ["investigation", "analysis", "hypothesis", "implementation"],
+      "auto_trigger": false
+    },
+    {
+      "id": "vibe-integrity-writer",
+      "name": "vibe-integrity-writer",
+      "category": "architecture-memory",
+      "description": "Specialized skill for safely updating .vibe-integrity/ YAML files with multi-agent collaboration support",
+      "implementation": "skills-base/vibe-integrity-writer/vibe-integrity-writer.py",
+      "config_file": null,
+      "entry_points": ["--target", "--operation", "--data"],
+      "dependencies": [],
+      "outputs": [
+        ".vibe-integrity/tech-records.yaml",
+        ".vibe-integrity/risk-zones.yaml",
+        ".vibe-integrity/dependency-graph.yaml",
+        ".vibe-integrity/module-map.yaml",
+        ".vibe-integrity/schema-evolution.yaml",
+        ".vibe-integrity/project.yaml"
+      ],
+      "operations": ["add_record", "update_record", "delete_record", "append_list", "set_field", "merge_object", "batch_operations"],
+      "auto_trigger": false
+    },
+    {
+      "id": "vibe-integrity",
+      "name": "vibe-integrity",
+      "category": "validation",
+      "description": "Validates .vibe-integrity/ directory structure and YAML schema integrity",
+      "implementation": "skills-base/vibe-integrity/validate-vibe-integrity.py",
+      "config_file": null,
+      "entry_points": ["--validate", "--init", "--fix"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    },
+    {
+      "id": "sdd-orchestrator",
+      "name": "sdd-orchestrator",
+      "category": "sdd-workflow",
+      "description": "Single controller for strict Spec-Driven Development execution with state transitions and gate checks",
+      "implementation": "skills-sdd/sdd-orchestrator/validate-sdd.py",
+      "config_file": "skills-sdd/sdd-orchestrator/sdd-gate-checklist.json",
+      "entry_points": ["--start", "--validate", "--transition", "--state"],
+      "dependencies": ["vibe-guard", "spec-architect", "spec-to-codebase", "spec-contract-diff", "spec-driven-test", "sdd-release-guard"],
+      "outputs": [
+        ".sdd-spec/specs/*.state.json"
+      ],
+      "states": ["Ideation", "Explore", "SpecCheckpoint", "Build", "Verify", "ReleaseReady", "Released"],
+      "auto_trigger": false
+    },
+    {
+      "id": "spec-architect",
+      "name": "spec-architect",
+      "category": "sdd-workflow",
+      "description": "Builds executable specs from ambiguous requirements",
+      "implementation": "skills-sdd/spec-architect/spec-architect.py",
+      "config_file": null,
+      "entry_points": ["--create", "--requirements"],
+      "dependencies": [],
+      "outputs": [
+        ".sdd-spec/specs/*.spec.yaml"
+      ],
+      "auto_trigger": false
+    },
+    {
+      "id": "spec-to-codebase",
+      "name": "spec-to-codebase",
+      "category": "sdd-workflow",
+      "description": "Generates implementation from validated spec contracts",
+      "implementation": "skills-sdd/spec-to-codebase/spec-to-codebase.py",
+      "config_file": null,
+      "entry_points": ["--generate", "--spec"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    },
+    {
+      "id": "spec-contract-diff",
+      "name": "spec-contract-diff",
+      "category": "sdd-workflow",
+      "description": "Detects drift between implemented interfaces and spec contracts",
+      "implementation": "skills-sdd/spec-contract-diff/spec-contract-diff.py",
+      "config_file": null,
+      "entry_points": ["--check", "--diff"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    },
+    {
+      "id": "spec-driven-test",
+      "name": "spec-driven-test",
+      "category": "sdd-workflow",
+      "description": "Builds and enforces test gates from spec contracts",
+      "implementation": "skills-sdd/spec-driven-test/spec-driven-test.py",
+      "config_file": null,
+      "entry_points": ["--run", "--coverage"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    },
+    {
+      "id": "sdd-release-guard",
+      "name": "sdd-release-guard",
+      "category": "sdd-workflow",
+      "description": "Applies final SDD release gates and rollback readiness checks",
+      "implementation": "skills-sdd/sdd-release-guard/sdd-release-guard.py",
+      "config_file": null,
+      "entry_points": ["--release", "--verify"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    },
+    {
+      "id": "spec-traceability",
+      "name": "spec-traceability",
+      "category": "sdd-workflow",
+      "description": "Maintains story-to-contract-to-code-to-test mapping",
+      "implementation": "skills-sdd/spec-traceability/spec-traceability.py",
+      "config_file": null,
+      "entry_points": ["--track", "--report"],
+      "dependencies": [],
+      "outputs": [],
+      "auto_trigger": false
+    }
+  ],
+  "workflows": {
+    "vibe-coding": {
+      "description": "Rapid prototyping workflow with completion guards",
+      "skills": ["vibe-design", "vibe-integrity-writer", "vibe-guard"]
+    },
+    "vibe-debug": {
+      "description": "Systematic debugging with architecture memory",
+      "skills": ["vibe-integrity-debug", "vibe-integrity-writer", "vibe-guard"]
+    },
+    "sdd-full": {
+      "description": "Full SDD workflow with strict state management",
+      "skills": ["sdd-orchestrator", "spec-architect", "spec-to-codebase", "spec-contract-diff", "spec-driven-test", "sdd-release-guard", "vibe-guard"]
+    }
+  },
+  "path_aliases": {
+    "skills-base": "D:/Code/aaa/skills-base",
+    "skills-sdd": "D:/Code/aaa/skills-sdd"
+  }
+}

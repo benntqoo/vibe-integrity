@@ -1,4 +1,51 @@
-#!/usr/bin/env python3
+# QB|#!/usr/bin/env python3
+# YW|"""
+# QR|Vibe Integrity Writer - Safe YAML file updater with multi-agent collaboration support
+# MB|=====================================================================================
+# BT|
+# SY|A specialized tool for safely updating .vibe-integrity/ YAML files with:
+# TX|- File locking to prevent concurrent writes
+# ZT|- Agent identity tracking
+# KX|- Conflict detection
+# YS|- Atomic operations
+# JJ|- Backup creation
+# MQ|"""
+# BQ|
+# VK|import os
+# PH|import sys
+# TZ|import json
+# ZV|import yaml
+# MB|import time
+# YH|import uuid
+# RP|import hashlib
+# MQ|import tempfile
+# YP|import threading
+# VB|from pathlib import Path
+# NY|from datetime import datetime
+# KB|from typing import Dict, List, Optional, Any, Union
+# PP|from dataclasses import dataclass, asdict
+# NP|from contextlib import contextmanager
+# BQ|
+# HY|# Cross-platform file locking support
+# QT|try:
+# KM|    from filelock import FileLock as _CrossPlatformLock
+# ZK|    HAS_FILELOCK = True
+except ImportError:
+    HAS_FILELOCK = False
+
+# Platform-specific locking as fallback
+try:
+    import fcntl
+    HAS_FCNTL = True
+except ImportError:
+    HAS_FCNTL = False
+    try:
+        import msvcrt  # Windows alternative
+        HAS_MSVCRT = True
+    except ImportError:
+        HAS_MSVCRT = False
+
+# XK|# Configuration
 """
 Vibe Integrity Writer - Safe YAML file updater with multi-agent collaboration support
 =====================================================================================
@@ -18,6 +65,19 @@ import yaml
 import time
 import uuid
 # fcntl is Unix-only, will use alternative on Windows
+# Try to use filelock library for better cross-platform support
+try:
+    from filelock import FileLock as _CrossPlatformLock
+    HAS_FILELOCK = True
+except ImportError:
+    HAS_FILELOCK = False
+    # Fallback to platform-specific locking
+    try:
+        import fcntl
+        HAS_FCNTL = True
+    except ImportError:
+        HAS_FCNTL = False
+        import msvcrt  # Windows alternative
 try:
     import fcntl
     HAS_FCNTL = True
@@ -39,7 +99,92 @@ BACKUP_DIR = VIBE_DIR / 'backups'
 LOCK_DIR = VIBE_DIR / 'locks'
 AGENT_REGISTRY = VIBE_DIR / 'agents.yaml'
 
-# Default timeout for file locks (seconds)
+# SZ|# Default timeout for file locks (seconds)
+NK|LOCK_TIMEOUT = 30
+RB|LOCK_POLL_INTERVAL = 0.1
+
+# VS|
+# Cross-platform lock wrapper
+@dataclass
+class CrossPlatformLock:
+    """Cross-platform file locking with automatic fallback"""
+    lock_file: Path
+    timeout: int = LOCK_TIMEOUT
+    
+    _lock: Any = None
+    _fd: Any = None
+    
+    def __post_init__(self):
+        self.lock_file.parent.mkdir(parents=True, exist_ok=True)
+    
+    def acquire(self) -> bool:
+        """Acquire lock with cross-platform support"""
+        start_time = time.time()
+        
+        while time.time() - start_time < self.timeout:
+            try:
+                if HAS_FILELOCK:
+                    # Use filelock library (best cross-platform)
+                    self._lock = _CrossPlatformLock(str(self.lock_file), timeout=self.timeout)
+                    self._lock.acquire(timeout=self.timeout)
+                    return True
+                    
+                elif HAS_FCNTL:
+                    # Unix
+                    self._fd = open(self.lock_file, 'w')
+                    fcntl.flock(self._fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    self._fd.write(f"Locked: {datetime.now().isoformat()}\n")
+                    self._fd.flush()
+                    return True
+                    
+                elif HAS_MSVCRT:
+                    # Windows
+                    self._fd = open(self.lock_file, 'w')
+                    msvcrt.locking(self._fd.fileno(), msvcrt.LK_NBLCK, 1)
+                    self._fd.write(f"Locked: {datetime.now().isoformat()}\n")
+                    self._fd.flush()
+                    return True
+                    
+                else:
+                    # No locking available - fail safe
+                    return False
+                    
+            except (IOError, OSError, ImportError) as e:
+                # Lock held or unavailable - check stale
+                if self.lock_file.exists():
+                    try:
+                        age = time.time() - self.lock_file.stat().st_mtime
+                        if age > self.timeout:
+                            self.lock_file.unlink()
+                            continue
+                    except:
+                        pass
+                time.sleep(LOCK_POLL_INTERVAL)
+        
+        return False
+    
+    def release(self):
+        """Release lock"""
+        try:
+            if HAS_FILELOCK and self._lock:
+                self._lock.release()
+            elif self._fd:
+                self._fd.close()
+                if self.lock_file.exists():
+                    self.lock_file.unlink()
+        except:
+            pass
+    
+    def __enter__(self):
+        if not self.acquire():
+            raise TimeoutError(f"Could not acquire lock: {self.lock_file}")
+        return self
+    
+    def __exit__(self, *args):
+        self.release()
+
+# VQ|@dataclass
+YH|class FileLock:
 LOCK_TIMEOUT = 30
 LOCK_POLL_INTERVAL = 0.1
 
