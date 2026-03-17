@@ -1,0 +1,32 @@
+# Skills Framework Dependencies
+# ==============================
+# Install: pip install -r requirements.txt
+#
+# Core dependencies for vibe-integrity and vibe-guard skills
+
+# ============================================
+# Core (required)
+# ============================================
+pyyaml>=6.0.0
+
+# ============================================
+# Optional but recommended
+# ============================================
+# File locking (cross-platform)
+filelock>=3.12.0
+
+# ============================================
+# Pre-commit hooks
+# ============================================
+pre-commit>=3.6.0
+
+# ============================================
+# Development tools (optional)
+# ============================================
+# For commit message linting - requires Node.js
+# npm install -g @commitlint/cli @commitlint/config-conventional
+
+# ============================================
+# Type checking (optional)
+# ============================================
+# basedpyright  # LSP server - uncomment if needed
