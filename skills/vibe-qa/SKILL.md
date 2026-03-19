@@ -19,9 +19,11 @@ description: Use when need to run end-to-end tests, browser automation, visual r
 - Smoke testing before release
 
 **NOT use when:**
-- Unit testing (use `spec-driven-test`)
+- Unit testing (use `spec-driven-test` for SDD, `test-driven-development` for TDD)
 - Code review (use `vibe-debug`)
 - Design discussions (use `vibe-design`)
+
+**Context:** Works as the final QA gate for both SDD (after spec-driven-test) and TDD (after red-green-refactor).
 
 ---
 
@@ -321,7 +323,8 @@ pipeline_metadata:
 
 | Skill | Relationship |
 |-------|--------------|
-| `spec-driven-test` | Unit/integration tests + TDD |
+| `spec-driven-test` | Contract verification tests (spec-first, NOT TDD) |
+| `test-driven-development` | TDD for internal module logic (before/alongside SDD) |
 | `vibe-debug` | Debug failed tests |
 | `vibe-design` | Visual consistency |
 | `sdd-release-guard` | Final QA gate |
@@ -329,26 +332,3 @@ pipeline_metadata:
 ---
 
 **Remember: Trust, but verify. Test the complete user journey.**
-
----
-
-## Pipeline Metadata
-
-pipeline_metadata:
-  handoff:
-    delivers:
-      - artifact: "QA report (markdown/JSON)"
-        description: "E2E test results with pass/fail counts per mode"
-      - artifact: "screenshots/"
-        description: "Captured screenshots of test runs"
-    consumes:
-      - artifact: "running application"
-        description: "Application to test against (localhost or deployed)"
-      - artifact: "SPEC-REQUIREMENTS.md"
-        description: "User flow definitions for critical path testing"
-  exit_condition:
-    success: "All critical paths pass with no failing tests"
-    failure: "Test failures detected — fix before release"
-    triggers_next_on_success: "sdd-release-guard (final gate before release)"
-    triggers_next_on_failure: "vibe-debug (fix failing user flows)"
-  agent_pattern: Reviewer

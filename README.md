@@ -84,7 +84,7 @@ project/
 │       ├── README.md            # English docs
 │       └── *.py                 # Scripts
 │
-├── skills/                         # 18 skills total
+├── skills/                         # 19 skills total
 │   │
 │   ├── Self-Awareness (4):        # AI self-awareness mechanisms
 │   │   ├── knowledge-boundary/ # Knows/infers/assumes/unknown
@@ -186,7 +186,7 @@ When AI starts on this project, read in order:
 
 ## Related Skills
 
-All 18 skills are classified by Google 5 Agent Design Patterns:
+All 19 skills are classified by Google 5 Agent Design Patterns:
 
 | Pattern | Skill | Purpose |
 |---------|-------|---------|
@@ -196,6 +196,7 @@ All 18 skills are classified by Google 5 Agent Design Patterns:
 | **Generator** | `vibe-redesign` | Product discovery (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
 | **Generator** | `vibe-architect` | Tech selection + architecture design |
 | **Generator** | `vibe-design` | Design system consultation |
+| **Generator** | `test-driven-development` | Red-green-refactor for single-module logic (TDD standalone) |
 | **Reviewer** | `spec-contract-diff` | Detect drift between code and contracts |
 | **Reviewer** | `spec-traceability` | Verify story→contract→code→test linkage |
 | **Reviewer** | `spec-driven-test` | Enforce 100% test coverage |
@@ -219,7 +220,7 @@ Generator pattern outputs are validated against JSON schemas:
 | `skills/spec-architect/spec-requirements.schema.json` | Validates SPEC-REQUIREMENTS.md structure |
 | `skills/spec-architect/spec-architecture.schema.json` | Validates SPEC-ARCHITECTURE.md structure |
 | `skills/sdd-orchestrator/sdd-machine-schema.json` | Validates SDD report outputs |
-| `skills/sdd-orchestrator/reviewer.interface.yaml` | Unified Reviewer invocation interface |
+| `skills/sdd-orchestrator/reviewer.interface.yaml` | Unified Reviewer interface (8 reviewers, 20 criteria) |
 
 > 注：CLI命令详细用法见 [VIC-CLI-GUIDE.md](./docs/VIC-CLI-GUIDE.md)
 

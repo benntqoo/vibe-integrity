@@ -17,8 +17,13 @@ Single controller for strict Spec-Driven Development (SDD) execution. Enforces o
 - Requiring auditable state transition history
 
 **When NOT to use:**
-- Ad-hoc feature implementation without SDD workflow
+- Ad-hoc feature implementation without SDD workflow → use `test-driven-development` instead
 - Simple documentation updates (use fast-path mode)
+- Single-module internal logic (no cross-module interfaces) → use `test-driven-development` instead
+
+**SDD vs TDD:**
+- SDD (this skill): Cross-module, contracts, formal gates, traceability
+- TDD (`test-driven-development`): Single-module, internal logic, red-green-refactor
 
 ## Invocation Alignment
 

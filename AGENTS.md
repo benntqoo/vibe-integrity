@@ -10,7 +10,7 @@
 ✅ **Self-Aware AI**: Yes, via 4 self-awareness mechanisms
 ✅ **Pattern System**: Yes, via Google 5-agent-design-patterns mapped to skills
 ✅ **Schema-Validated Outputs**: Yes, via JSON Schema for SPEC docs
-✅ **Pipeline-Defined**: Yes, via pipeline_metadata in all 18 skills
+✅ **Pipeline-Defined**: Yes, via pipeline_metadata in all 19 skills
 ❌ **Real-Time Collaboration**: No, requires Git merge workflow
 
 ---
@@ -25,7 +25,7 @@ VIBE-SDD implements Google's 5 core agent design patterns. Each pattern maps to 
 | **Generator** | Fixed-format output via templates | SPEC docs + `spec-requirements.schema.json`, `spec-architecture.schema.json` | ✅ 90% |
 | **Reviewer** | Dedicated checker for quality/gaps | 8 reviewers in `reviewer.interface.yaml` (spec-contract-diff, spec-traceability, etc.) | ✅ 90% |
 | **Invoke** | On-demand knowledge retrieval | `AGENTS.md` (protocol layer) + `sdd-orchestrator` (enforcement layer) | ✅ 85% |
-| **Pipeline** | Sequential steps with checkpoints | All 18 skills have `pipeline_metadata` defining handoff/exit/triggers | ✅ 90% |
+| **Pipeline** | Sequential steps with checkpoints | All 19 skills have `pipeline_metadata` defining handoff/exit/triggers | ✅ 90% |
 
 ### Pattern → Component Reference
 
@@ -38,12 +38,16 @@ Generator:
   Templates: SPEC-REQUIREMENTS.md, SPEC-ARCHITECTURE.md
   JSON Schemas: skills/spec-architect/spec-requirements.schema.json
                skills/spec-architect/spec-architecture.schema.json
+  Skills: spec-architect, spec-to-codebase, vibe-think, vibe-redesign,
+          vibe-architect, vibe-design, knowledge-boundary,
+          test-driven-development
 
-Reviewer:
-  Interface: skills/sdd-orchestrator/reviewer.interface.yaml
-  Skills: spec-contract-diff, spec-traceability, spec-driven-test,
-          vibe-qa, vibe-design, pre-decision-check, signal-register,
-          knowledge-boundary
+  Reviewer:
+    Interface: skills/sdd-orchestrator/reviewer.interface.yaml
+    Skills: spec-contract-diff, spec-traceability, spec-driven-test,
+            vibe-qa, vibe-design, pre-decision-check, signal-register,
+            knowledge-boundary, exploration-journal, vibe-debug,
+            adaptive-planning
 
 Invoke:
   Protocol: AGENTS.md (when to invoke what)
@@ -63,7 +67,7 @@ AGENTS.md (Protocol Layer):
   → WHOLE AI's perspective
   → Defines: "When should I invoke which skill?"
   → Mechanism: AI reads AGENTS.md → follows protocol
-  → Scope: All 18 skills across all phases
+  → Scope: All 19 skills across all phases
 
 sdd-orchestrator (Enforcement Layer):
   → SDD PHASE ONLY
@@ -174,6 +178,110 @@ entries:
 ```
 
 **Skill**: `exploration-journal`
+
+---
+
+## SDD vs TDD: Which Mode to Use?
+
+**VIBE-SDD supports two development modes. Choose the right one for the task.**
+
+### Decision Tree (5 Questions)
+
+```
+Start: User Prompt
+ │
+ ├─ Q1: Does the project have SPEC/contract infrastructure?
+ │       (.vic-sdd/SPEC-REQUIREMENTS.md exists?)
+ │       ├─ NO  → TDD standalone mode
+ │       └─ YES → Continue
+ │
+ ├─ Q2: Does the task involve cross-module interfaces/APIs?
+ │       ├─ YES → SDD mode
+ │       └─ NO  → Continue
+ │
+ ├─ Q3: Does the user mention contracts, APIs, or compliance?
+ │       ├─ YES → SDD mode
+ │       └─ NO  → Continue
+ │
+ ├─ Q4: Is the complexity in algorithm/logic rather than requirements?
+ │       ├─ YES → TDD standalone mode
+ │       └─ NO  → Continue
+ │
+ └─ Q5: Is the scope a single file/function?
+         ├─ YES → TDD standalone mode
+         └─ NO  → SDD mode (system-level)
+```
+
+### Mode Comparison
+
+| Dimension | SDD (Spec-Driven) | TDD (Test-Driven) |
+|-----------|-------------------|------------------|
+| **Scope** | Multi-module / system | Single module / function |
+| **Interface** | Explicit contracts | Internal (no contracts) |
+| **Test direction** | Spec → Contract → Test | Test → Code → Refactor |
+| **Entry** | `spec-architect` | `test-driven-development` |
+| **Exit** | `sdd-release-guard` | Commit / `vibe-qa` |
+| **Traceability** | SPEC → Contract → Code → Test | Test → Code |
+| **Gateway** | Formal gates (Gate 0-3) | None |
+| **Test location** | `.sdd-spec/tests/` | Same dir as code |
+
+### When to Use SDD
+
+```
+✅ User mentions: API, interface, contract, multi-module
+✅ Project has: SPEC-REQUIREMENTS.md, contract.json
+✅ Cross-service or cross-module boundaries involved
+✅ Compliance/traceability requirements
+✅ Team needs formal review gates
+```
+
+### When to Use TDD
+
+```
+✅ Greenfield project (no SPEC yet)
+✅ Single function / algorithm implementation
+✅ Complexity is in logic, not requirements
+✅ User explicitly asks for TDD / red-green-refactor
+✅ Refactoring internal code with test coverage
+```
+
+### Layered Mode: SDD + TDD Together
+
+For large projects, use **both** with clear separation:
+
+```
+┌─────────────────────────────────────────┐
+│  SDD Layer — Contract Tests             │
+│  Scope: Cross-module interfaces, APIs   │
+│  Tool:  spec-driven-test               │
+│  Tests live in: .sdd-spec/tests/       │
+│  Driven by: contract.json              │
+└──────────────┬──────────────────────────┘
+               │ Boundary: public interface
+               ▼
+┌─────────────────────────────────────────┐
+│  TDD Layer — Unit Tests                 │
+│  Scope: Internal implementation logic   │
+│  Tool:  test-driven-development         │
+│  Tests live in: Same dir as code        │
+│  Driven by: Red-green-refactor cycle    │
+└─────────────────────────────────────────┘
+
+Rule: TDD tests NEVER test cross-module behavior.
+Rule: SDD contract tests NEVER test internal logic.
+```
+
+### Switching Modes Mid-Task
+
+```
+SDD → TDD:  When implementation reveals complex internal algorithm
+            → Pause contract work, use TDD for that function
+            → Resume SDD when algorithm is settled
+
+TDD → SDD:  When exploration reveals cross-module implications
+            → TDD tests become acceptance criteria in contract
+            → Migrate to SDD for formal interface definition
+```
 
 ---
 
@@ -360,6 +468,7 @@ SDD skills MUST activate self-awareness at these points:
 | `spec-to-codebase` | Entry + each file generated | signal-register |
 | `spec-contract-diff` | Entry + each diff found | signal-register, exploration-journal |
 | `spec-driven-test` | Entry + each test created | signal-register |
+| `spec-traceability` | Any state change | knowledge-boundary, signal-register |
 | `sdd-release-guard` | Final gate | pre-decision-check (final), signal-register (final summary) |
 
 ### Integration with Vibe Skills
@@ -373,6 +482,8 @@ Vibe skills MUST activate self-awareness at these points:
 | `vibe-design` | Entry | knowledge-boundary, pre-decision-check |
 | `vibe-debug` | Entry + each attempted fix | knowledge-boundary, exploration-journal, signal-register |
 | `vibe-qa` | Entry | signal-register |
+| `vibe-redesign` | Entry | knowledge-boundary (verify assumptions about user intent) |
+| `adaptive-planning` | Entry + scope change | knowledge-boundary, pre-decision-check, signal-register |
 
 ### Confidence Check Trigger Points
 
@@ -536,6 +647,14 @@ vic validate
 | `vibe-debug` | Systematic debugging with root cause analysis |
 | `vibe-qa` | Quality assurance, verification against specs |
 | `adaptive-planning` | Adaptive replanning when scope changes |
+
+### TDD Skill (Standalone Mode)
+
+| Skill | Purpose | When to Use |
+|-------|---------|-------------|
+| `test-driven-development` | Red-green-refactor cycle for single-module logic | No SPEC/contracts, single file/function, internal algorithm |
+
+**Note**: `test-driven-development` is a standalone mode — NOT part of SDD pipeline. Use SDD for cross-module work, use TDD for internal logic. In layered mode, both can coexist with clear boundary (SDD = public interfaces, TDD = internal implementation).
 
 ---
 

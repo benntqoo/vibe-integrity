@@ -329,6 +329,19 @@ AI Slop: 10/10
 2. After design review: Generate fix commits
 3. Update `SPEC-ARCHITECTURE.md` with design decisions
 
+---
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|--------------|
+| `vibe-architect` | Design decisions in architecture spec |
+| `vibe-qa` | Verify design implementation via e2e tests |
+| `pre-decision-check` | Design quality gate before release |
+| `spec-architect` | Integrate design into SPEC contracts |
+
+---
+
 ## Invocation
 
 ```bash

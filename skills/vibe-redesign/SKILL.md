@@ -173,6 +173,19 @@ After redesign is complete:
 
 3. Create/update `SPEC-REQUIREMENTS.md` with validated scope
 
+---
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|--------------|
+| `vibe-think` | Clarify requirements after scope is selected |
+| `vibe-architect` | Translate validated scope into architecture |
+| `knowledge-boundary` | Verify assumptions about user needs |
+| `pre-decision-check` | Validate selected mode before committing |
+
+---
+
 ## Common Traps
 
 ### Trap 1: Implementing Literally

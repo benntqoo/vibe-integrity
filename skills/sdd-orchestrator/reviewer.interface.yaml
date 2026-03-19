@@ -407,6 +407,126 @@ criteria:
       - "If outside approved scope, within max_expansion limit"
     pass_threshold: "In approved scope OR explicit human approval"
 
+  breaking_change_detection:
+    description: "Changes to contracts do not break existing consumers"
+    checks:
+      - "No removed required fields"
+      - "No changed field types"
+      - "No removed operations"
+      - "Breaking changes declared with migration path"
+    pass_threshold: "Zero breaking changes OR all breaking changes declared"
+
+  completeness_100:
+    description: "All spec items have corresponding artifacts"
+    checks:
+      - "Every user story has acceptance criteria"
+      - "Every acceptance criterion has contracts"
+      - "Every contract operation has implementation"
+      - "Every implementation has tests"
+    pass_threshold: "100% completeness across entire requirement chain"
+
+  error_coverage_100:
+    description: "All defined error codes have test coverage"
+    checks:
+      - "Every error code in contract has at least one test"
+      - "Error messages are validated"
+      - "Error recovery paths are tested"
+    pass_threshold: "100% error code coverage"
+
+  acceptance_coverage_100:
+    description: "All acceptance criteria have executable test coverage"
+    checks:
+      - "Every acceptance criterion maps to test(s)"
+      - "Happy path and edge cases covered"
+      - "Test descriptions reference acceptance criteria"
+    pass_threshold: "100% acceptance criterion coverage"
+
+  e2e_pass:
+    description: "End-to-end user flows complete without errors"
+    checks:
+      - "Critical user journeys execute successfully"
+      - "No console errors during user flows"
+      - "Data persists correctly across flows"
+    pass_threshold: "All e2e tests pass"
+
+  critical_paths_covered:
+    description: "All critical user paths have e2e test coverage"
+    checks:
+      - "Core user flows (signup, login, primary action) tested"
+      - "Payment/checkout flows (if applicable) tested"
+      - "Error recovery flows tested"
+    pass_threshold: "All critical paths covered by e2e tests"
+
+  ai_slop_free:
+    description: "No recognizable AI-generated design patterns detected"
+    checks:
+      - "No gradient hero backgrounds"
+      - "No three-column icon grids"
+      - "No uniform 8px border radius everywhere"
+      - "No generic stock photos"
+      - "No 'Get Started' CTAs"
+      - "No centered-everything layout"
+      - "No '© 2024' footer"
+    pass_threshold: "Zero recognized AI slop patterns"
+
+  quality_no_violations:
+    description: "No quality hard-lines are violated"
+    checks:
+      - "No hardcoded secrets"
+      - "No type suppression (as any, @ts-ignore)"
+      - "No empty catch blocks"
+      - "Tests exist for new features"
+      - "No console.log in production code"
+    pass_threshold: "Zero quality hard-line violations"
+
+  signals_healthy:
+    description: "Signal register shows healthy progress state"
+    checks:
+      - "Confidence score >= 0.4"
+      - "Blockers count < 2"
+      - "No vague signals (no 'progress', 'started', 'working')"
+      - "All signals have specific, verifiable evidence"
+    pass_threshold: "confidence >= 0.4 AND blockers < 2"
+
+  confidence_threshold:
+    description: "Confidence score meets minimum threshold"
+    checks:
+      - "Confidence >= 0.4 (LOW threshold) to continue"
+      - "Confidence >= 0.7 (HIGH threshold) for release gate"
+    pass_threshold: "Confidence >= 0.4 for continued work"
+
+  blocker_management:
+    description: "Blockers are actively tracked and being resolved"
+    checks:
+      - "All blockers have recorded evidence"
+      - "Blockers have resolution strategies"
+      - "No blocker older than 1 week without progress"
+    pass_threshold: "No blocker older than 1 week OR explicit workaround documented"
+
+  knowledge_completeness:
+    description: "All knowledge items are properly categorized"
+    checks:
+      - "Known items have source evidence"
+      - "Inferred items marked for verification"
+      - "Assumed items have risk level"
+      - "Unknown items do not block critical tasks"
+    pass_threshold: "Zero unknown blockers AND all assumed items have risk levels"
+
+  unknown_blockers_resolved:
+    description: "Unknown items blocking critical tasks are resolved or workaround exists"
+    checks:
+      - "No unknown items in 'blocks' position"
+      - "Unknown items resolved via investigation or explicitly deferred"
+    pass_threshold: "Zero unknown items blocking critical path"
+
+  assumed_items_verified:
+    description: "Assumed items with high risk have been verified"
+    checks:
+      - "High-risk assumed items verified with evidence"
+      - "Medium-risk assumed items have verification plan"
+      - "Low-risk assumed items documented"
+    pass_threshold: "All high-risk assumed items verified"
+
 
 # ============================================================
 # 4. REVIEW WORKFLOW EXAMPLES

@@ -291,6 +291,17 @@ Decision: Always update assumption first
 
 ---
 
+## Related Skills
+
+| Skill | Relationship |
+|-------|--------------|
+| `pre-decision-check` | Gate reassessment decisions |
+| `signal-register` | Record evidence of plan changes |
+| `knowledge-boundary` | Update known/inferred/assumed after replanning |
+| `vibe-redesign` | Re-explore scope if replan reveals major issues |
+
+---
+
 ## Pipeline Metadata
 
 pipeline_metadata:

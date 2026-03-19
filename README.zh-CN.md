@@ -84,7 +84,7 @@ project/
 │       ├── README.md           # 英文文档
 │       └── *.py                # 脚本
 │
-├── skills/                         # 共 18 个 skills
+├── skills/                         # 共 19 个 skills
 │   │
 │   ├── 自我认知 (4):              # AI 自知之明机制
 │   │   ├── knowledge-boundary/ # 知道/推断/假设/不知
@@ -184,7 +184,7 @@ VIBE-SDD 通过 4 个机制赋予 AI"自知之明"：
 
 ## 相关 Skills
 
-18 个 Skills 均按 Google 5 Agent Design Patterns 分类：
+19 个 Skills 均按 Google 5 Agent Design Patterns 分类：
 
 | 模式 | Skill | 用途 |
 |------|-------|------|
@@ -194,6 +194,7 @@ VIBE-SDD 通过 4 个机制赋予 AI"自知之明"：
 | **Generator** | `vibe-redesign` | 产品探索 (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
 | **Generator** | `vibe-architect` | 技术选型 + 架构设计 |
 | **Generator** | `vibe-design` | 设计系统咨询 |
+| **Generator** | `test-driven-development` | 单模块逻辑的红绿重构 (TDD 独立模式) |
 | **Reviewer** | `spec-contract-diff` | 检测代码与契约的漂移 |
 | **Reviewer** | `spec-traceability` | 验证故事→契约→代码→测试链路 |
 | **Reviewer** | `spec-driven-test` | 强制 100% 测试覆盖率 |
@@ -217,7 +218,7 @@ Generator 模式产出均通过 JSON Schema 验证：
 | `skills/spec-architect/spec-requirements.schema.json` | 验证 SPEC-REQUIREMENTS.md 结构 |
 | `skills/spec-architect/spec-architecture.schema.json` | 验证 SPEC-ARCHITECTURE.md 结构 |
 | `skills/sdd-orchestrator/sdd-machine-schema.json` | 验证 SDD 报告输出 |
-| `skills/sdd-orchestrator/reviewer.interface.yaml` | 统一 Reviewer 调用接口 |
+| `skills/sdd-orchestrator/reviewer.interface.yaml` | 统一 Reviewer 接口 (8 个 Reviewer, 20 个 criteria) |
 
 ## 安装
 

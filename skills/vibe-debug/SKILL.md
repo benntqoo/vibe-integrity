@@ -22,7 +22,9 @@ Systematic debugging methodology for root cause analysis.
 - Syntax errors (fix directly)
 - Simple config issues
 - Clear-cut problems
-- Writing new code
+- Writing new code (use TDD or SDD instead)
+
+**Context:** Works with both SDD (fixing contract-aligned code) and TDD (fixing unit test failures).
 
 ---
 
@@ -134,6 +136,9 @@ Phase 4 - Implement Fix:
 |-------|--------------|
 | `vibe-think` | Questioning techniques |
 | `signal-register` | Record issues and fix evidence |
+| `exploration-journal` | vibe-debug READS journal to avoid repeated failed attempts; writes fixed root causes back via `vic rr` (see consumes: .vic-sdd/exploration-journal.yaml in handoff) |
+
+**Distinction**: `exploration-journal` is a persistent GLOBAL memory across all work. `vibe-debug` is a per-session root cause analysis. vibe-debug consults the global journal but does not auto-sync — developer must manually record via `vic rr`.
 
 ---
 
