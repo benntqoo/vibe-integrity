@@ -24,6 +24,8 @@ type Config struct {
 	SpecRequirements    string
 	SpecArchitecture    string
 	ProjectState        string
+	AutoStateFile       string
+	CostTrackingFile    string
 
 	// Output settings
 	OutputFormat string // json, yaml, plain
@@ -73,6 +75,8 @@ func Load() *Config {
 	cfg.SpecRequirements = filepath.Join(vicPath, "SPEC-REQUIREMENTS.md")
 	cfg.SpecArchitecture = filepath.Join(vicPath, "SPEC-ARCHITECTURE.md")
 	cfg.ProjectState = filepath.Join(vicPath, "PROJECT.md")
+	cfg.AutoStateFile = filepath.Join(vicPath, "status", "auto.yaml")
+	cfg.CostTrackingFile = filepath.Join(vicPath, "status", "cost.yaml")
 
 	return cfg
 }

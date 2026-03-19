@@ -39,6 +39,14 @@ For more information, visit: https://github.com/vic-sdd/vic
 	rootCmd.AddCommand(NewSpecCmd(cfg))
 	rootCmd.AddCommand(NewPhaseCmd(cfg))
 	rootCmd.AddCommand(NewGateCmd(cfg))
+	rootCmd.AddCommand(NewAutoCmd(cfg))
+	rootCmd.AddCommand(NewCostCmd(cfg))
+	rootCmd.AddCommand(NewReplanCmd(cfg))
+	rootCmd.AddCommand(NewProductCmd(cfg))
+	rootCmd.AddCommand(NewSlopCmd(cfg))
+	rootCmd.AddCommand(NewTddCmd(cfg))
+	rootCmd.AddCommand(NewDebugCmd(cfg))
+	rootCmd.AddCommand(NewQaCmd(cfg))
 
 	// Add flags
 	rootCmd.PersistentFlags().StringVarP(&cfg.OutputFormat, "output", "o", cfg.OutputFormat, "Output format (json, yaml, plain)")
