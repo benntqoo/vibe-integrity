@@ -85,3 +85,24 @@ Check all externally visible surfaces:
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/specs/<feature>.contract.diff.json"
+        description: "Diff report with added/removed operations, signature mismatches"
+    consumes:
+      - artifact: ".sdd-spec/specs/<feature>.contract.json"
+        description: "Expected contract"
+      - artifact: "implementation code"
+        description: "Actual code interfaces"
+  exit_condition:
+    success: "No drift detected, requires_spec_update=false"
+    failure: "Drift detected, requires_spec_update=true"
+    triggers_next_on_success: "spec-driven-test (stay in Build)"
+    triggers_next_on_failure: "spec-architect (requires_spec_update=true, return to Explore)"
+  agent_pattern: Reviewer

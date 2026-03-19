@@ -294,6 +294,29 @@ Before declaring QA complete:
 
 ---
 
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "QA report (markdown/JSON)"
+        description: "E2E test results with pass/fail counts per mode"
+      - artifact: "screenshots/"
+        description: "Captured screenshots of test runs"
+    consumes:
+      - artifact: "running application"
+        description: "Application to test against (localhost or deployed)"
+      - artifact: "SPEC-REQUIREMENTS.md"
+        description: "User flow definitions for critical path testing"
+  exit_condition:
+    success: "All critical paths pass with no failing tests"
+    failure: "Test failures detected — fix before release"
+    triggers_next_on_success: "sdd-release-guard (final gate before release)"
+    triggers_next_on_failure: "vibe-debug (fix failing user flows)"
+  agent_pattern: Reviewer
+
+---
+
 ## Related Skills
 
 | Skill | Relationship |
@@ -306,3 +329,26 @@ Before declaring QA complete:
 ---
 
 **Remember: Trust, but verify. Test the complete user journey.**
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "QA report (markdown/JSON)"
+        description: "E2E test results with pass/fail counts per mode"
+      - artifact: "screenshots/"
+        description: "Captured screenshots of test runs"
+    consumes:
+      - artifact: "running application"
+        description: "Application to test against (localhost or deployed)"
+      - artifact: "SPEC-REQUIREMENTS.md"
+        description: "User flow definitions for critical path testing"
+  exit_condition:
+    success: "All critical paths pass with no failing tests"
+    failure: "Test failures detected — fix before release"
+    triggers_next_on_success: "sdd-release-guard (final gate before release)"
+    triggers_next_on_failure: "vibe-debug (fix failing user flows)"
+  agent_pattern: Reviewer

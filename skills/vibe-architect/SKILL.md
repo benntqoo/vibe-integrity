@@ -21,7 +21,7 @@ Technical architect tool for technology selection, system architecture design, a
 
 **NOT use when:**
 - Requirements unclear (use vibe-think)
-- Implementing code (use vibe-develop)
+- Implementing code (use sdd-orchestrator → spec-to-codebase)
 - Debugging issues (use vibe-debug)
 
 ---
@@ -295,3 +295,28 @@ Before SPEC completion:
 - [ ] Architecture diagram clear?
 - [ ] Gate 1 check passed?
 - [ ] Entered SDD workflow via sdd-orchestrator?
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "SPEC-ARCHITECTURE.md"
+        description: "Complete technical architecture with tech stack, modules, data models"
+      - artifact: ".vic-sdd/tech/tech-records.yaml (via vic rt)"
+        description: "Technology decisions recorded"
+      - artifact: ".vic-sdd/risk-zones.yaml (via vic rr)"
+        description: "Architecture risks identified"
+    consumes:
+      - artifact: "SPEC-REQUIREMENTS.md"
+        description: "Validated requirements"
+      - artifact: ".vic-sdd/knowledge-boundary.yaml"
+        description: "AI's knowledge about the tech stack and architecture patterns"
+  exit_condition:
+    success: "SPEC-ARCHITECTURE.md complete, Gate 1 passed"
+    failure: "Architecture incomplete or Gate 1 failed — continue until pass"
+    triggers_next_on_success: "sdd-orchestrator (Phase 1→2 bridge, invokes spec-architect)"
+    triggers_next_on_failure: "vibe-architect (fix incomplete sections)"
+  agent_pattern: Generator

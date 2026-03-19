@@ -186,26 +186,40 @@ When AI starts on this project, read in order:
 
 ## Related Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `vibe-think` | Requirements clarification, user story discovery |
-| `vibe-architect` | Tech selection, architecture design |
-| `vibe-redesign` | Product redesign, scope re-evaluation |
-| `vibe-design` | Design system, UI/UX specifications |
-| `vibe-debug` | Systematic debugging with root cause analysis |
-| `vibe-qa` | Quality assurance, verification against specs |
-| `adaptive-planning` | Adaptive replanning when scope changes |
-| `sdd-orchestrator` | Entry point for SDD phase, state machine |
-| `spec-architect` | Freeze requirements into contracts |
-| `spec-to-codebase` | Generate implementation from contracts |
-| `spec-contract-diff` | Detect drift between spec and code |
-| `spec-driven-test` | Build and enforce test gates |
-| `spec-traceability` | Story-to-contract-to-code-to-test mapping |
-| `sdd-release-guard` | Final SDD release gates |
-| `knowledge-boundary` | Self-awareness: knows/infers/assumes/unknown |
-| `pre-decision-check` | Self-awareness: gate check before decisions |
-| `signal-register` | Self-awareness: evidence-based progress tracking |
-| `exploration-journal` | Self-awareness: exploration memory |
+All 18 skills are classified by Google 5 Agent Design Patterns:
+
+| Pattern | Skill | Purpose |
+|---------|-------|---------|
+| **Generator** | `spec-architect` | Freeze requirements into contracts |
+| **Generator** | `spec-to-codebase` | Generate implementation from contracts |
+| **Generator** | `vibe-think` | Clarify requirements through trade-off analysis |
+| **Generator** | `vibe-redesign` | Product discovery (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
+| **Generator** | `vibe-architect` | Tech selection + architecture design |
+| **Generator** | `vibe-design` | Design system consultation |
+| **Reviewer** | `spec-contract-diff` | Detect drift between code and contracts |
+| **Reviewer** | `spec-traceability` | Verify story→contract→code→test linkage |
+| **Reviewer** | `spec-driven-test` | Enforce 100% test coverage |
+| **Reviewer** | `vibe-qa` | E2E quality assurance (Playwright) |
+| **Reviewer** | `vibe-design` (Mode 2) | 80-item design audit + AI slop detection |
+| **Reviewer** | `pre-decision-check` | Gate check before all major decisions |
+| **Reviewer** | `signal-register` | Evidence-based progress tracking |
+| **Reviewer** | `knowledge-boundary` | Knowledge completeness review |
+| **Reviewer** | `exploration-journal` | Exploration memory (no repeats) |
+| **Reviewer** | `vibe-debug` | Root cause analysis (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
+| **Reviewer** | `adaptive-planning` | Reassess plans when new info contradicts assumptions |
+| **Pipeline** | `sdd-orchestrator` | Enforce SDD state machine (Ideation→Released) |
+| **Tool Wrapper** | `vic` CLI | 25 commands — see [cmd/vic-go/README.md](./cmd/vic-go/README.md) |
+
+### Schema Files
+
+Generator pattern outputs are validated against JSON schemas:
+
+| Schema | Purpose |
+|--------|---------|
+| `skills/spec-architect/spec-requirements.schema.json` | Validates SPEC-REQUIREMENTS.md structure |
+| `skills/spec-architect/spec-architecture.schema.json` | Validates SPEC-ARCHITECTURE.md structure |
+| `skills/sdd-orchestrator/sdd-machine-schema.json` | Validates SDD report outputs |
+| `skills/sdd-orchestrator/reviewer.interface.yaml` | Unified Reviewer invocation interface |
 
 > 注：CLI命令详细用法见 [VIC-CLI-GUIDE.md](./docs/VIC-CLI-GUIDE.md)
 

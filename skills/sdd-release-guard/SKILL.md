@@ -93,3 +93,28 @@ Release decision is `pass` only if all checks pass:
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/specs/<feature>.release.guard.json"
+        description: "Final release decision with gate results"
+    consumes:
+      - artifact: ".sdd-spec/specs/<feature>.contract.diff.json (pass)"
+        description: "spec-contract-diff result must be pass"
+      - artifact: ".sdd-spec/specs/<feature>.test.report.json (pass)"
+        description: "spec-driven-test result must be pass"
+      - artifact: ".sdd-spec/specs/<feature>.traceability.report.json (100%)"
+        description: "spec-traceability completeness must be 100%"
+      - artifact: ".vic-sdd/signal-register.yaml"
+        description: "Final signal review"
+  exit_condition:
+    success: "All gates pass, release_decision=pass"
+    failure: "Gate failed — fix until all pass"
+    triggers_next_on_success: "ReleaseReady → Released (feature shipped)"
+    triggers_next_on_failure: "sdd-release-guard (fix failed gates, stay in ReleaseReady)"
+  agent_pattern: Reviewer

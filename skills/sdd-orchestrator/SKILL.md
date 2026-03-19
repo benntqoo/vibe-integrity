@@ -144,3 +144,26 @@ After skill completes:
 - Schema: `skills/sdd-orchestrator/sdd-machine-schema.json`
 - Checklist: `skills/sdd-orchestrator/sdd-gate-checklist.json`
 - Validation: `python skills/sdd-orchestrator/validate-sdd.py`
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/specs/<feature>.state.json"
+        description: "Updated state record after transition"
+      - artifact: "state transition decision"
+        description: "Which next skill to invoke based on current state"
+    consumes:
+      - artifact: ".sdd-spec/specs/<feature>.state.json"
+        description: "Current state record"
+      - artifact: ".vic-sdd/signal-register.yaml"
+        description: "Current signals for checkpoint decision"
+  exit_condition:
+    success: "State promoted to next valid state, next skill identified"
+    failure: "Remain in current valid state, blocker recorded"
+    triggers_next_on_success: "spec-architect (Ideation/Explore), spec-to-codebase (SpecCheckpoint), spec-contract-diff (Build), spec-driven-test (Build/Verify), sdd-release-guard (ReleaseReady)"
+    triggers_next_on_failure: "pre-decision-check (resolve blockers before retry)"
+  agent_pattern: Pipeline

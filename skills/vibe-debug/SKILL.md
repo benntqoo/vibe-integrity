@@ -133,8 +133,7 @@ Phase 4 - Implement Fix:
 | Skill | Relationship |
 |-------|--------------|
 | `vibe-think` | Questioning techniques |
-| `vibe-integrity` | Record findings with `vic rr` |
-| `vibe-develop` | Implement fix with Gate checks |
+| `signal-register` | Record issues and fix evidence |
 
 ---
 
@@ -168,3 +167,28 @@ Before proposing fix:
 ---
 
 **Golden Rule: Never fix a symptom without understanding the root cause.**
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "debug report (markdown)"
+        description: "Root cause analysis with SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT flow"
+      - artifact: "updated source code"
+        description: "Root cause fix applied"
+    consumes:
+      - artifact: "bug description or error message"
+        description: "What is broken"
+      - artifact: "relevant source code"
+        description: "Code to investigate"
+      - artifact: ".vic-sdd/exploration-journal.yaml"
+        description: "Previous attempts to avoid repeating failures"
+  exit_condition:
+    success: "Root cause identified and fix implemented"
+    failure: "3+ failed hypotheses — STOP, question the architecture itself"
+    triggers_next_on_success: "spec-driven-test (verify fix) or vibe-qa (E2E check)"
+    triggers_next_on_failure: "pre-decision-check (architecture review needed)"
+  agent_pattern: Reviewer

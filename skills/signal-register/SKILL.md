@@ -261,3 +261,24 @@ exploration-journal → 记录探索过程 → 与信号相关
 | 不更新信心度 | 每次都重新计算 |
 | 忽略 warning | 记录并关注 |
 | 不处理 blocker | 停止，等待人类 |
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".vic-sdd/signal-register.yaml"
+        format: yaml
+        schema: null
+        description: "Updated signals with new positive/warnings/blockers and recalculated confidence"
+    consumes:
+      - artifact: "meaningful action result"
+        description: "What just happened (code created, test passed, bug fixed, etc.)"
+  exit_condition:
+    success: "Signal recorded with timestamp, confidence recalculated"
+    failure: "Unable to record signal — append-only, should always succeed"
+    triggers_next_on_success: "continue to next action"
+    triggers_next_on_failure: "pre-decision-check (confidence check)"
+  agent_pattern: Reviewer

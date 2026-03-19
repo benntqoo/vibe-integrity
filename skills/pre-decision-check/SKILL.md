@@ -259,3 +259,28 @@ grep -A 10 "^signals:" .vic-sdd/decision-guardrails.yaml
 | 忽略 forbidden | 必须停止，询问 |
 | 违反质量红线 | 绝对不允许 |
 | 不记录决策 | 每次决策都要记录 |
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "decision result (PASS/WARN/STOP/BLOCK)"
+        format: yaml
+        schema: null
+        description: "Decision outcome indicating whether to proceed with the current decision"
+    consumes:
+      - artifact: ".vic-sdd/decision-guardrails.yaml"
+        description: "Scope, attempts, quality hard-lines configuration"
+      - artifact: ".vic-sdd/signal-register.yaml"
+        description: "Current positive/warnings/blockers signals"
+      - artifact: ".vic-sdd/knowledge-boundary.yaml"
+        description: "Known/inferred/assumed/unknown categorization"
+  exit_condition:
+    success: "PASS or WARN — decision is within acceptable bounds"
+    failure: "STOP or BLOCK — decision violates constraints or has unresolved blockers"
+    triggers_next_on_success: "domain skill execution"
+    triggers_next_on_failure: "STOP — record blocker in signal-register.yaml"
+  agent_pattern: Reviewer

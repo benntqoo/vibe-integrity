@@ -284,3 +284,24 @@ pre-decision-check → 决策前 → 查询 journal
 | 不记失败原因 | 失败原因最重要 |
 | 不查 journal | 开始任务前先查询 |
 | 重复尝试 | 查询避免重复 |
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".vic-sdd/exploration-journal.yaml"
+        format: yaml
+        schema: null
+        description: "Updated journal with explore/tried/decided/learned entries"
+    consumes:
+      - artifact: "exploration event"
+        description: "What was explored, tried, decided, or learned"
+  exit_condition:
+    success: "Journal entry appended with timestamp"
+    failure: "none (journal recording is always append-only)"
+    triggers_next_on_success: "continue exploration or decision"
+    triggers_next_on_failure: "none (journal recording is always append-only)"
+  agent_pattern: Reviewer

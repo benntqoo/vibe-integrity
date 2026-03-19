@@ -1,0 +1,495 @@
+# Reviewer Interface
+#
+# Unified interface for all Reviewer-type skills in VIBE-SDD.
+# Defines how to invoke, what to output, and how to register reviewers.
+#
+# This file is the canonical reference for the Google "Reviewer" design pattern
+# in the VIBE-SDD context.
+#
+# Pattern: Tool Wrapper (this file) + Generator (schemas above)
+#          + Reviewer (this interface) + Pipeline (AGENTS.md)
+#
+# Usage:
+#   When you need to review an artifact, consult this interface to:
+#   1. Find the right reviewer(s) for the artifact type
+#   2. Call the reviewer with the standard invoke format
+#   3. Expect the standard output format
+#
+# References:
+#   - Google Agent Design: Reviewer = dedicated checker for quality
+#   - SDD machine schema: skills/sdd-orchestrator/sdd-machine-schema.json
+#   - Gate checklist: skills/sdd-orchestrator/sdd-gate-checklist.json
+
+# ============================================================
+# 1. INVOKE FORMAT (Standard Contract)
+# ============================================================
+# Every reviewer MUST accept this input format and produce this output format.
+# This ensures reviewers can be chained, parallelized, or sequenced.
+
+invoke_format:
+  # Standard input when calling any reviewer
+  input:
+    artifact_path:
+      type: string
+      required: true
+      description: |
+        Path to the artifact to review.
+        Examples:
+          - .vic-sdd/SPEC-REQUIREMENTS.md
+          - .sdd-spec/specs/auth.contract.json
+          - src/auth/login.ts
+          - .vic-sdd/signal-register.yaml
+
+    criteria_id:
+      type: string
+      required: true
+      description: |
+        Which criteria to check. References reviewer.criteria.<id>.
+        Examples:
+          - spec_completeness      # Check SPEC completeness
+          - contract_alignment      # Check code vs contract
+          - traceability_complete   # Check requirement chain
+          - quality_signals         # Check progress quality
+          - design_audit            # Check design quality
+          - ai_slop                 # Check for AI slop patterns
+
+    context:
+      type: object
+      required: false
+      description: |
+        Additional context for the review.
+        Fields vary by reviewer but may include:
+          - spec_path: Path to related SPEC document
+          - previous_result: Result from last review
+          - strictness: loose | standard | strict
+          - focus_areas: Array of specific areas to focus on
+
+  # Standard output every reviewer MUST produce
+  output:
+    result:
+      type: string
+      enum: [pass, fail, warn, blocked]
+      description: |
+        - pass: All criteria met, no issues found
+        - fail: Criteria not met, issues found
+        - warn: Criteria mostly met, minor issues
+        - blocked: Cannot review, missing dependencies
+
+    confidence:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: |
+        Reviewer's confidence in this result.
+        Calculate: (positive_evidence - warning_evidence*0.3) / total_evidence
+
+    issues:
+      type: array
+      description: List of specific issues found
+      items:
+        type: object
+        required: [id, severity, description]
+        properties:
+          id:
+            type: string
+            pattern: "^[A-Z]+-\\d{3}$"
+            description: Issue ID, e.g. ISSUE-001
+          severity:
+            type: string
+            enum: [critical, high, medium, low]
+            description: |
+              - critical: Must fix before proceeding
+              - high: Should fix before proceeding
+              - medium: Fix when convenient
+              - low: Optional polish
+          category:
+            type: string
+            description: |
+              Category of issue. Common values:
+                - completeness: Missing required content
+                - alignment: Drift from specification
+                - traceability: Broken requirement chain
+                - quality: Code/document quality issues
+                - pattern: Anti-pattern detected
+          description:
+            type: string
+            description: Human-readable issue description
+          location:
+            type: string
+            description: File or section where issue was found
+          recommendation:
+            type: string
+            description: How to fix this issue
+          blocks_gate:
+            type: boolean
+            default: false
+            description: Whether this issue blocks gate progression
+
+    evidence:
+      type: array
+      description: Evidence supporting the result
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [grep_result, file_read, test_output, metric, inspection]
+          content:
+            type: string
+          source:
+            type: string
+            description: File path or command that produced this evidence
+
+    metadata:
+      type: object
+      properties:
+        reviewer_id:
+          type: string
+          description: Which reviewer skill produced this result
+        timestamp:
+          type: string
+          format: date-time
+        duration_ms:
+          type: integer
+          description: Time spent on this review in milliseconds
+        criteria_checked:
+          type: array
+          items: { type: string }
+        report_path:
+          type: string
+          description: Path to detailed report file (if generated)
+
+
+# ============================================================
+# 2. REGISTERED REVIEWERS
+# ============================================================
+# All reviewers available in VIBE-SDD, their focus areas,
+# and which criteria they handle.
+
+registered_reviewers:
+
+  # ---- SDD Reviewers (Phase 2-3) ----
+
+  - id: spec-contract-diff
+    name: "Spec Contract Diff Reviewer"
+    description: |
+      Detects drift between implemented code interfaces and spec contracts.
+      Checks: API routes, method signatures, event schemas, error codes.
+    focus:
+      - Code vs contract alignment
+      - Breaking changes
+      - Missing error scenarios
+    criteria_handled:
+      - contract_alignment
+      - breaking_change_detection
+    entry_conditions:
+      - ".sdd-spec/specs/<feature>.contract.json must exist"
+      - "Implementation code must exist"
+    output_path_pattern: ".sdd-spec/specs/<feature>.contract.diff.json"
+    reference: skills/spec-contract-diff/SKILL.md
+
+  - id: spec-traceability
+    name: "Traceability Reviewer"
+    description: |
+      Verifies complete linkage between requirements → contracts →
+      code → tests. Verification-only, does not change state.
+    focus:
+      - Story → acceptance mapping
+      - Acceptance → contract mapping
+      - Contract → test mapping
+      - Orphan detection
+    criteria_handled:
+      - traceability_complete
+      - completeness_100
+    entry_conditions:
+      - "SPEC-REQUIREMENTS.md must exist"
+      - "Contract files must exist"
+    output_path_pattern: ".sdd-spec/specs/<feature>.traceability.report.json"
+    reference: skills/spec-traceability/SKILL.md
+
+  - id: spec-driven-test
+    name: "Test Coverage Reviewer"
+    description: |
+      Verifies that spec contracts have executable test coverage.
+      Enforces 100% coverage on acceptance criteria, contract operations, and error codes.
+    focus:
+      - Test coverage completeness
+      - Error scenario coverage
+      - Acceptance criterion coverage
+    criteria_handled:
+      - test_coverage_100
+      - error_coverage_100
+      - acceptance_coverage_100
+    entry_conditions:
+      - "Contract.json must exist"
+      - "Traceability.yaml must exist"
+    output_path_pattern: ".sdd-spec/specs/<feature>.test.report.json"
+    reference: skills/spec-driven-test/SKILL.md
+
+  # ---- Vibe Reviewers (Phase 4) ----
+
+  - id: vibe-qa
+    name: "E2E QA Reviewer"
+    description: |
+      End-to-end quality assurance through browser automation.
+      Tests complete user journeys, not individual components.
+    focus:
+      - User flow completeness
+      - Regression detection
+      - Smoke testing
+    criteria_handled:
+      - e2e_pass
+      - critical_paths_covered
+    modes:
+      - quick: Smoke test (~30s)
+      - diff-aware: Changed features only (5-10 min)
+      - full: Complete application (5-15 min)
+      - regression: Compare against baseline
+    entry_conditions:
+      - "Application must be running"
+      - "Playwright configured"
+    reference: skills/vibe-qa/SKILL.md
+
+  - id: vibe-design
+    name: "Design System Reviewer"
+    description: |
+      Reviews design system consistency and detects AI slop patterns.
+      Mode 2: 80-item design audit across 5 categories.
+    focus:
+      - Information architecture
+      - Visual design consistency
+      - Interaction design
+      - AI slop pattern detection
+    criteria_handled:
+      - design_consistency
+      - ai_slop_free
+    audit_categories:
+      - information_architecture: 10 items
+      - visual_design: 20 items
+      - interaction_design: 15 items
+      - layout: 15 items
+      - ai_slop_detection: 20 items
+    reference: skills/vibe-design/SKILL.md
+
+  # ---- Self-Awareness Reviewers (All Phases) ----
+
+  - id: pre-decision-check
+    name: "Pre-Decision Reviewer"
+    description: |
+      Reviews decisions BEFORE they are made.
+      Checks scope, quality hard-lines, and signal state.
+      This is the primary gate-keeper for all major decisions.
+    focus:
+      - Scope compliance (approved/forbidden)
+      - Quality hard-line violations
+      - Signal state (confidence, blockers)
+      - Attempt limits
+    criteria_handled:
+      - scope_approved
+      - quality_no_violations
+      - signals_healthy
+    decision_guardrails:
+      - .vic-sdd/decision-guardrails.yaml (scope, attempts, quality lines)
+      - .vic-sdd/signal-register.yaml (current signal state)
+    reference: skills/pre-decision-check/SKILL.md
+
+  - id: signal-register
+    name: "Progress Quality Reviewer"
+    description: |
+      Reviews the quality of progress signals.
+      Ensures evidence-based progress instead of vague percentage claims.
+    focus:
+      - Signal specificity (no "progress" claims)
+      - Evidence completeness
+      - Blocker resolution
+      - Confidence calculation
+    criteria_handled:
+      - quality_signals
+      - confidence_threshold
+      - blocker_management
+    reference: skills/signal-register/SKILL.md
+
+  - id: knowledge-boundary
+    name: "Knowledge Completeness Reviewer"
+    description: |
+      Reviews the completeness and accuracy of knowledge boundaries.
+      Checks that known/inferred/assumed/unknown are properly categorized.
+    focus:
+      - Unknown items blocking critical tasks
+      - Assumed items with high risk unverified
+      - Inferred items needing verification
+      - Known items properly sourced
+    criteria_handled:
+      - knowledge_completeness
+      - unknown_blockers_resolved
+      - assumed_items_verified
+    reference: skills/knowledge-boundary/SKILL.md
+
+
+# ============================================================
+# 3. REVIEW CRITERIA DEFINITIONS
+# ============================================================
+# Standard criteria that reviewers check against.
+# Each criterion has: what to check, how to check, pass threshold.
+
+criteria:
+
+  spec_completeness:
+    description: "SPEC document has all required sections filled"
+    checks:
+      - "All metadata fields present"
+      - "All user stories have acceptance criteria"
+      - "All acceptance criteria map to contracts"
+      - "No TBD/TODO placeholders in critical sections"
+      - "Phase planning complete"
+    pass_threshold: "All critical checks pass"
+
+  contract_alignment:
+    description: "Implementation matches spec contracts"
+    checks:
+      - "No removed operations without breaking-change declaration"
+      - "No removed required output fields"
+      - "Error codes remain backward compatible"
+      - "All contract operations have implementation"
+    pass_threshold: "Zero contract mismatches"
+
+  traceability_complete:
+    description: "Full requirement chain exists"
+    checks:
+      - "No orphan stories (all have acceptance criteria)"
+      - "No orphan acceptance criteria (all have contracts)"
+      - "No orphan contract operations (all have code entry points)"
+      - "No orphan code entry points (all have tests)"
+    pass_threshold: "100% completeness, zero orphan items"
+
+  quality_signals:
+    description: "Progress recorded as evidence, not percentages"
+    checks:
+      - "No vague signals like 'progress', 'started', 'working'"
+      - "All signals have specific, verifiable content"
+      - "Confidence calculated correctly"
+      - "Blockers are actively being resolved"
+    pass_threshold: "All signals specific + confidence >= 0.4"
+
+  design_consistency:
+    description: "Design follows established system patterns"
+    checks:
+      - "Typography consistent"
+      - "Color palette consistent"
+      - "Spacing scale applied"
+      - "No jarring visual breaks"
+    pass_threshold: "Category score >= 7/10"
+
+  ai_slop:
+    description: "No recognizable AI-generated design/code patterns"
+    checks:
+      - "No gradient hero backgrounds"
+      - "No three-column icon grids"
+      - "No uniform 8px border radius everywhere"
+      - "No generic stock photos"
+      - "No 'Get Started' CTAs"
+      - "No centered-everything layout"
+      - "No '© 2024' footer"
+    pass_threshold: "Zero recognized AI slop patterns"
+
+  test_coverage_100:
+    description: "100% test coverage on acceptance criteria"
+    checks:
+      - "Every acceptance criterion has at least one test"
+      - "Every contract operation has success and failure tests"
+      - "Every error code has at least one assertion"
+    pass_threshold: "100% coverage, zero flaky markers"
+
+  scope_approved:
+    description: "Decision is within approved scope"
+    checks:
+      - "Decision not in forbidden list"
+      - "If outside approved scope, within max_expansion limit"
+    pass_threshold: "In approved scope OR explicit human approval"
+
+
+# ============================================================
+# 4. REVIEW WORKFLOW EXAMPLES
+# ============================================================
+# Standard patterns for chaining reviewers.
+
+examples:
+
+  # Example 1: Pre-implementation review
+  pre_implementation:
+    description: "Review SPEC before starting implementation"
+    steps:
+      - reviewer: pre-decision-check
+        criteria: scope_approved
+      - reviewer: spec-contract-diff
+        criteria: contract_alignment
+        depends_on: [pre-decision-check]
+        condition: "Only if previous result was pass"
+
+  # Example 2: Post-implementation review (SDD gate)
+  post_implementation:
+    description: "Review after implementation before release"
+    steps:
+      - reviewer: spec-contract-diff
+        criteria: contract_alignment
+      - reviewer: spec-traceability
+        criteria: traceability_complete
+        depends_on: [spec-contract-diff]
+      - reviewer: spec-driven-test
+        criteria: [test_coverage_100, quality_signals]
+        depends_on: [spec-traceability]
+      - reviewer: pre-decision-check
+        criteria: [scope_approved, quality_signals]
+
+  # Example 3: Design review
+  design_review:
+    description: "Review design system implementation"
+    steps:
+      - reviewer: vibe-design
+        criteria: [design_consistency, ai_slop]
+        mode: full_audit
+
+  # Example 4: Progress review (self-awareness checkpoint)
+  progress_checkpoint:
+    description: "Review progress quality at checkpoint"
+    steps:
+      - reviewer: signal-register
+        criteria: quality_signals
+      - reviewer: knowledge-boundary
+        criteria: knowledge_completeness
+      - reviewer: pre-decision-check
+        criteria: [signals_healthy, quality_no_violations]
+
+
+# ============================================================
+# 5. ANTI-PATTERNS (What NOT to Do)
+# ============================================================
+
+anti_patterns:
+  - id: APA-001
+    name: "Reviewer skip"
+    description: |
+      Skipping required reviewer before proceeding to next phase.
+      Example: Not running spec-contract-diff before spec-driven-test.
+    fix: "Always run all required reviewers in sequence."
+
+  - id: APA-002
+    name: "Result interpretation bypass"
+    description: |
+      Treating 'fail' as 'pass' because issues seem minor.
+      Example: "Only 2 issues found, let's proceed."
+    fix: "If result is fail, issues must be fixed. Only 'warn' with low-severity issues can proceed."
+
+  - id: APA-003
+    name: "Stale review"
+    description: |
+      Using review results from outdated artifacts.
+      Example: Review was run before recent code changes.
+    fix: "Re-run reviewer when artifact has changed since last review."
+
+  - id: APA-004
+    name: "Reviewer chain break"
+    description: |
+      Skipping prerequisite reviewers in a chain.
+      Example: Running spec-driven-test without spec-contract-diff first.
+    fix: "Respect depends_on relationships. Run in order."

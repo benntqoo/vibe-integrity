@@ -80,3 +80,30 @@ Matrix passes only when:
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/specs/<feature>.traceability.yaml"
+        description: "Updated traceability matrix with verified links"
+      - artifact: ".sdd-spec/specs/<feature>.traceability.report.json"
+        description: "Verification report with completeness %"
+    consumes:
+      - artifact: "SPEC-REQUIREMENTS.md"
+        description: "User stories and acceptance criteria"
+      - artifact: ".sdd-spec/specs/<feature>.contract.json"
+        description: "Contract operations"
+      - artifact: "implementation code"
+        description: "Code entry points"
+      - artifact: "test files"
+        description: "Test coverage"
+  exit_condition:
+    success: "100% completeness, zero orphan items"
+    failure: "Orphan items found — add missing links"
+    triggers_next_on_success: "return to calling skill (sdd-orchestrator or upstream)"
+    triggers_next_on_failure: "spec-architect (add missing traceability links)"
+  agent_pattern: Reviewer

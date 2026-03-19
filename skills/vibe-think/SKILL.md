@@ -173,9 +173,9 @@ vic rt --id SEARCH-001 \
 |-------|--------------|
 | `vic CLI` | Record decisions |
 | `vibe-debug` | Analyze problem root cause |
-| `vibe-integrity` | Read project context |
-| `vibe-architect` | Tech selection → SPEC-ARCHITECTURE.md |
-| `vibe-develop` | Implementation → Gate checks |
+| `pre-decision-check` | Verify decision quality before committing |
+| `signal-register` | Record decisions and signals |
+| `vibe-redesign` | Re-explore product scope if needed |
 
 ---
 
@@ -204,3 +204,28 @@ When recording:
 - [ ] Decision ID follows naming convention?
 - [ ] Reason clearly stated?
 - [ ] Related risks identified?
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "understanding summary (verbal or written)"
+        description: "Clarified requirements with trade-off analysis table"
+      - artifact: ".vic-sdd/tech/tech-records.yaml (via vic rt)"
+        description: "Recorded decisions"
+      - artifact: ".vic-sdd/risk-zones.yaml (via vic rr)"
+        description: "Recorded risks"
+    consumes:
+      - artifact: "SPEC-REQUIREMENTS.md (draft)"
+        description: "User's initial requirement description"
+      - artifact: ".vic-sdd/knowledge-boundary.yaml"
+        description: "What AI knows about the domain"
+  exit_condition:
+    success: "Requirements clarified, decisions recorded, risks identified"
+    failure: "Requirements still ambiguous — re-invoke vibe-think or vibe-redesign"
+    triggers_next_on_success: "vibe-architect or vibe-redesign"
+    triggers_next_on_failure: "vibe-redesign (re-clarify scope)"
+  agent_pattern: Generator

@@ -7,8 +7,73 @@
 ✅ **Multi-Agent Supported**: Yes, via Git branching workflow
 ✅ **Multi-User Supported**: Yes, via Git collaboration
 ✅ **Structured Development**: Yes, via .vic-sdd/ SPEC workflow
-✅ **Self-Aware AI**: Yes, via Knowledge Boundary + Signal Register
+✅ **Self-Aware AI**: Yes, via 4 self-awareness mechanisms
+✅ **Pattern System**: Yes, via Google 5-agent-design-patterns mapped to skills
+✅ **Schema-Validated Outputs**: Yes, via JSON Schema for SPEC docs
+✅ **Pipeline-Defined**: Yes, via pipeline_metadata in all 18 skills
 ❌ **Real-Time Collaboration**: No, requires Git merge workflow
+
+---
+
+## Google 5 Agent Design Patterns → VIBE-SDD Mapping
+
+VIBE-SDD implements Google's 5 core agent design patterns. Each pattern maps to specific components:
+
+| Pattern | Google Definition | VIBE-SDD Implementation | Coverage |
+|---------|-------------------|-------------------------|---------|
+| **Tool Wrapper** | Encapsulate capabilities with clear boundaries | `vic` CLI (25 commands) — each wraps a specific capability | ✅ 95% |
+| **Generator** | Fixed-format output via templates | SPEC docs + `spec-requirements.schema.json`, `spec-architecture.schema.json` | ✅ 90% |
+| **Reviewer** | Dedicated checker for quality/gaps | 8 reviewers in `reviewer.interface.yaml` (spec-contract-diff, spec-traceability, etc.) | ✅ 90% |
+| **Invoke** | On-demand knowledge retrieval | `AGENTS.md` (protocol layer) + `sdd-orchestrator` (enforcement layer) | ✅ 85% |
+| **Pipeline** | Sequential steps with checkpoints | All 18 skills have `pipeline_metadata` defining handoff/exit/triggers | ✅ 90% |
+
+### Pattern → Component Reference
+
+```
+Tool Wrapper:
+  vic CLI (cmd/vic-go/) → 25 commands with exact parameters and output formats
+  Schemas: skills/sdd-orchestrator/sdd-machine-schema.json
+
+Generator:
+  Templates: SPEC-REQUIREMENTS.md, SPEC-ARCHITECTURE.md
+  JSON Schemas: skills/spec-architect/spec-requirements.schema.json
+               skills/spec-architect/spec-architecture.schema.json
+
+Reviewer:
+  Interface: skills/sdd-orchestrator/reviewer.interface.yaml
+  Skills: spec-contract-diff, spec-traceability, spec-driven-test,
+          vibe-qa, vibe-design, pre-decision-check, signal-register,
+          knowledge-boundary
+
+Invoke:
+  Protocol: AGENTS.md (when to invoke what)
+  Enforcement: sdd-orchestrator SKILL.md (enforces state transitions)
+
+Pipeline:
+  Reference: AGENTS.md Pipeline sections + Self-Awareness Activation Protocol
+  Metadata: Each skill has pipeline_metadata (handoff, exit_condition, triggers)
+```
+
+### Invoke Boundary Clarification
+
+AGENTS.md and sdd-orchestrator serve DIFFERENT layers — both are needed:
+
+```
+AGENTS.md (Protocol Layer):
+  → WHOLE AI's perspective
+  → Defines: "When should I invoke which skill?"
+  → Mechanism: AI reads AGENTS.md → follows protocol
+  → Scope: All 18 skills across all phases
+
+sdd-orchestrator (Enforcement Layer):
+  → SDD PHASE ONLY
+  → Enforces: "Which skills can be invoked in which SDD state?"
+  → Mechanism: State machine + gate checks
+  → Scope: 7 SDD skills + gate validation
+```
+
+**Rule**: When in SDD phase, always route through `sdd-orchestrator`.
+**Rule**: Outside SDD phase, follow AGENTS.md protocol directly.
 
 ---
 

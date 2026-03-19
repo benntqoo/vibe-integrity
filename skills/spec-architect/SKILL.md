@@ -100,3 +100,32 @@ All must pass before promoting to SpecCheckpoint:
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/specs/<feature>.md"
+        description: "Full specification with user stories, acceptance criteria, data models"
+      - artifact: ".sdd-spec/specs/<feature>.contract.json"
+        description: "API contract with operations, schemas, error codes"
+      - artifact: ".sdd-spec/specs/<feature>.traceability.yaml"
+        description: "Requirement-to-acceptance mapping"
+      - artifact: ".sdd-spec/specs/<feature>.risk.yaml"
+        description: "Risk assessment"
+      - artifact: ".sdd-spec/specs/<feature>.spec.report.json"
+        description: "Execution report with gate check results"
+    consumes:
+      - artifact: "SPEC-REQUIREMENTS.md"
+        description: "Source requirements"
+      - artifact: "SPEC-ARCHITECTURE.md"
+        description: "Architecture context"
+  exit_condition:
+    success: "All gate checks passed, promoted to SpecCheckpoint"
+    failure: "Gate check failed — fix specs until all pass"
+    triggers_next_on_success: "spec-to-codebase (enters SpecCheckpoint state)"
+    triggers_next_on_failure: "spec-architect (re-work specs until gate passes)"
+  agent_pattern: Generator

@@ -184,26 +184,40 @@ VIBE-SDD 通过 4 个机制赋予 AI"自知之明"：
 
 ## 相关 Skills
 
-| Skill | 用途 |
-|-------|------|
-| `vibe-think` | 需求澄清、用户故事挖掘 |
-| `vibe-architect` | 技术选型、架构设计 |
-| `vibe-redesign` | 产品重新设计、范围重评估 |
-| `vibe-design` | 设计系统、UI/UX 规范 |
-| `vibe-debug` | 系统性调试，根因分析 |
-| `vibe-qa` | 质量保证，对 SPEC 验证 |
-| `adaptive-planning` | 范围变化时的自适应重规划 |
-| `sdd-orchestrator` | SDD 阶段入口，状态机 |
-| `spec-architect` | 将需求凝固为契约 |
-| `spec-to-codebase` | 从契约生成实现代码 |
-| `spec-contract-diff` | 检测代码与契约的漂移 |
-| `spec-driven-test` | 构建并强制执行测试门禁 |
-| `spec-traceability` | 故事→契约→代码→测试追溯 |
-| `sdd-release-guard` | 最终 SDD 发布门禁 |
-| `knowledge-boundary` | 自我认知：知道/推断/假设/不知 |
-| `pre-decision-check` | 自我认知：决策前门禁检查 |
-| `signal-register` | 自我认知：证据链进度追踪 |
-| `exploration-journal` | 自我认知：探索过程记忆 |
+18 个 Skills 均按 Google 5 Agent Design Patterns 分类：
+
+| 模式 | Skill | 用途 |
+|------|-------|------|
+| **Generator** | `spec-architect` | 将需求凝固为契约 |
+| **Generator** | `spec-to-codebase` | 从契约生成实现代码 |
+| **Generator** | `vibe-think` | 需求澄清与权衡分析 |
+| **Generator** | `vibe-redesign` | 产品探索 (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
+| **Generator** | `vibe-architect` | 技术选型 + 架构设计 |
+| **Generator** | `vibe-design` | 设计系统咨询 |
+| **Reviewer** | `spec-contract-diff` | 检测代码与契约的漂移 |
+| **Reviewer** | `spec-traceability` | 验证故事→契约→代码→测试链路 |
+| **Reviewer** | `spec-driven-test` | 强制 100% 测试覆盖率 |
+| **Reviewer** | `vibe-qa` | 端到端质量保证 (Playwright) |
+| **Reviewer** | `vibe-design` (Mode 2) | 80项设计审计 + AI Slop 检测 |
+| **Reviewer** | `pre-decision-check` | 所有重大决策前的门禁检查 |
+| **Reviewer** | `signal-register` | 证据链进度追踪 |
+| **Reviewer** | `knowledge-boundary` | 知识完整性审查 |
+| **Reviewer** | `exploration-journal` | 探索过程记忆（避免重复踩坑）|
+| **Reviewer** | `vibe-debug` | 根因分析 (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
+| **Reviewer** | `adaptive-planning` | 新信息矛盾时重新评估计划 |
+| **Pipeline** | `sdd-orchestrator` | 强制执行 SDD 状态机 (Ideation→Released) |
+| **Tool Wrapper** | `vic` CLI | 25个命令 — 见 [cmd/vic-go/README.md](./cmd/vic-go/README.md) |
+
+### Schema 文件
+
+Generator 模式产出均通过 JSON Schema 验证：
+
+| Schema | 用途 |
+|--------|------|
+| `skills/spec-architect/spec-requirements.schema.json` | 验证 SPEC-REQUIREMENTS.md 结构 |
+| `skills/spec-architect/spec-architecture.schema.json` | 验证 SPEC-ARCHITECTURE.md 结构 |
+| `skills/sdd-orchestrator/sdd-machine-schema.json` | 验证 SDD 报告输出 |
+| `skills/sdd-orchestrator/reviewer.interface.yaml` | 统一 Reviewer 调用接口 |
 
 ## 安装
 

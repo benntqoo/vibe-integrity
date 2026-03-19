@@ -289,12 +289,25 @@ Decision: Always update assumption first
 | User request | Run full reassessment flow |
 | Environment change | Evaluate relevance, adapt if needed |
 
-## Invocation
+---
 
-```bash
-# Trigger reassessment
-vic replan
+## Pipeline Metadata
 
-# Or automatically after milestone
-# (Integrated into vic phase advance)
-```
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".vic-sdd/status/replan-log.yaml"
+        description: "Replan history entry with trigger, finding, decision, impact"
+      - artifact: "SPEC-REQUIREMENTS.md or SPEC-ARCHITECTURE.md (updated)"
+        description: "Updated specs if scope or timeline changed"
+    consumes:
+      - artifact: "original plan"
+        description: "What was originally planned"
+      - artifact: "new information"
+        description: "Research finding, technical surprise, or user feedback"
+  exit_condition:
+    success: "Plan reassessed, decision made, documented in replan-log.yaml"
+    failure: "Cannot reach consensus on adaptation — maintain course"
+    triggers_next_on_success: "continue with adjusted plan or maintain original plan"
+    triggers_next_on_failure: "pre-decision-check (evaluate options)"
+  agent_pattern: Reviewer

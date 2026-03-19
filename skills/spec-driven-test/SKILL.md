@@ -91,3 +91,28 @@ Converts spec artifacts into mandatory verification suites. Blocks promotion whe
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".sdd-spec/tests/specs/<feature>.contract.spec.*"
+        description: "Contract operation tests"
+      - artifact: ".sdd-spec/tests/specs/<feature>.acceptance.spec.*"
+        description: "Acceptance criterion tests"
+      - artifact: ".sdd-spec/specs/<feature>.test.report.json"
+        description: "Test execution report"
+    consumes:
+      - artifact: ".sdd-spec/specs/<feature>.contract.json"
+        description: "Contract with operations and error codes"
+      - artifact: ".sdd-spec/specs/<feature>.traceability.yaml"
+        description: "Requirement mappings for coverage check"
+  exit_condition:
+    success: "100% coverage, test report result=pass"
+    failure: "Coverage gaps or failing tests — fix until all pass"
+    triggers_next_on_success: "spec-traceability (enter Verify state)"
+    triggers_next_on_failure: "spec-driven-test (fix failing tests, stay in Build)"
+  agent_pattern: Reviewer

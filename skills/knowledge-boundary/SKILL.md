@@ -211,3 +211,24 @@ grep -B 1 -A 2 "blocks:" .vic-sdd/knowledge-boundary.yaml
 | 忽略 unknown | 标记为 blocker |
 | 推断不标 confidence | 必须标 confidence |
 | 验证了但不记录 | 验证后必须更新镜子 |
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: ".vic-sdd/knowledge-boundary.yaml"
+        format: yaml
+        schema: null
+        description: "Updated knowledge boundary with categorized items (known/inferred/assumed/unknown)"
+    consumes:
+      - artifact: "current task description"
+        description: "Task being started or wrapped up"
+  exit_condition:
+    success: "All task items categorized into known/inferred/assumed/unknown with no unresolved blockers"
+    failure: "Unknown items block critical path and cannot be resolved"
+    triggers_next_on_success: "pre-decision-check"
+    triggers_next_on_failure: "STOP — unknown blocks critical path"
+  agent_pattern: Generator

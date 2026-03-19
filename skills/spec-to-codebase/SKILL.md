@@ -87,3 +87,28 @@ Builds deterministic code changes from spec artifacts and enforces contract-pres
 
 Report structure must conform to `skills/sdd-orchestrator/sdd-machine-schema.json`.
 Gate checklist defined in `skills/sdd-orchestrator/sdd-gate-checklist.json`.
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "updated implementation files"
+        description: "Code aligned with contract operations"
+      - artifact: ".sdd-spec/specs/<feature>.codegen.report.json"
+        description: "Generation report with compatibility result"
+    consumes:
+      - artifact: ".sdd-spec/specs/<feature>.md"
+        description: "Specification source of truth"
+      - artifact: ".sdd-spec/specs/<feature>.contract.json"
+        description: "Contract with exact field definitions"
+      - artifact: ".sdd-spec/specs/<feature>.traceability.yaml"
+        description: "Story IDs for traceability"
+  exit_condition:
+    success: "Code generated, compatibility result pass"
+    failure: "Unresolved contract items — re-run spec-to-codebase"
+    triggers_next_on_success: "spec-contract-diff (enter Build state)"
+    triggers_next_on_failure: "spec-to-codebase (fix generation issues)"
+  agent_pattern: Generator

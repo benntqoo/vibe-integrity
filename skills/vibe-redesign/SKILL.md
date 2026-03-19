@@ -208,3 +208,26 @@ skill vibe-redesign
 # Or when starting a new feature
 "Help me redesign [feature request]"
 ```
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "docs/PRODUCT-REDESIGN.md"
+        description: "Product redesign decision with selected mode (EXPANSION/SELECTIVE/HOLD/REDUCTION)"
+      - artifact: ".vic-sdd/tech/tech-records.yaml"
+        description: "Product decisions recorded (via vic rt)"
+    consumes:
+      - artifact: "user's feature request"
+        description: "Original request to explore"
+      - artifact: "SPEC-REQUIREMENTS.md (draft)"
+        description: "Existing requirements context"
+  exit_condition:
+    success: "Product scope validated, mode selected, decisions recorded"
+    failure: "No clear product vision — use HOLD mode, stay focused"
+    triggers_next_on_success: "vibe-think (clarify selected scope)"
+    triggers_next_on_failure: "vibe-think (proceed with HOLD mode)"
+  agent_pattern: Generator

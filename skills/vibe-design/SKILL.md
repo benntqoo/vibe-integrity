@@ -340,3 +340,26 @@ skill vibe-design
 skill vibe-design
 # "Review the design of my app"
 ```
+
+---
+
+## Pipeline Metadata
+
+pipeline_metadata:
+  handoff:
+    delivers:
+      - artifact: "DESIGN.md"
+        description: "Design system specification (typography, colors, spacing, motion)"
+      - artifact: "design review report (markdown)"
+        description: "80-item audit results with per-category scores (0-10)"
+    consumes:
+      - artifact: "SPEC-ARCHITECTURE.md"
+        description: "Architecture context"
+      - artifact: "implemented UI/code (for review mode)"
+        description: "What to audit"
+  exit_condition:
+    success: "Design system complete (build mode) or audit complete with scores (review mode)"
+    failure: "Critical design issues found — fix before proceeding"
+    triggers_next_on_success: "implementation or vibe-qa (E2E testing)"
+    triggers_next_on_failure: "implementation (fix critical issues)"
+  agent_pattern: Generator
