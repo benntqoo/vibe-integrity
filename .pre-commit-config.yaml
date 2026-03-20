@@ -1,64 +1,79 @@
-# Pre-commit Configuration
-# =======================
+# Pre-commit Configuration for VIBE-SDD
+# ===========================================
+# 
+# This configuration enforces VIBE-SDD workflow through pre-commit hooks.
 # 
 # Install:
-#   pip install -r requirements.txt
 #   pre-commit install
 #   pre-commit install --hook-type commit-msg
 #
 # Run manually:
 #   pre-commit run --all-files
+#   pre-commit run vic-gate-check  # Run only VIBE-SDD gates
 #
-# Skip for single commit:
-#   git commit --no-verify -m "message"
+# Skip for emergency bypass:
+#   git commit --no-verify -m "emergency: bypass gates"
+#   ⚠️ Use sparingly - bypassing gates defeats the purpose
 
 default_stages: [pre-commit]
 default_language_version:
   python: python3.11
 
 ci:
-  autofix_prs: true
-  autofix_commit_msg: "chore: auto-fix pre-commit issues"
-  skip: [vibe-integrity-check, code-alignment-check]
+  autofix_prs: false
+  skip: []
 
 repos:
   # ============================================
-  # LOCAL HOOKS - Project-specific checks
+  # VIBE-SDD GATE CHECKS (BLOCKING)
   # ============================================
   - repo: local
     hooks:
-      # VIBE INTEGRITY - AI Completion Integrity Check
-      - id: vibe-integrity-check
-        name: Vibe Integrity (Full Validation)
-        entry: python cmd/vic/vic validate
+      # Gate Check - Block commits until all Gates pass
+      - id: vic-gate-check
+        name: VIBE-SDD Gate Check
+        entry: ./cmd/vic-go/vic gate check
         language: system
-        types: [python, javascript, typescript]
-        pass_filenames: false
+        types: [go, python, javascript, typescript, yaml, markdown]
+        pass_frozen: false
+        always_run: false  # Only run when relevant files change
+        verbose: true
+        stages: [pre-commit]
+        description: |
+          VIBE-SDD Gate Check - verifies all gates passed before commit.
+          Gate 0: Requirements complete
+          Gate 1: Architecture complete
+          Gate 2: Code aligns with SPEC
+          Gate 3: Test coverage adequate
+
+      # SPEC Integrity Check - Detect drift
+      - id: vic-spec-drift
+        name: VIBE-SDD SPEC Drift Check
+        entry: ./cmd/vic-go/vic check
+        language: system
+        types: [go, python, javascript, typescript]
+        pass_frozen: false
         always_run: true
         verbose: true
-        description: "Run full vibe-integrity validation (code alignment + event folding)"
+        stages: [pre-commit]
+        description: |
+          Detect when code drifts from SPEC declarations.
+          Warns if new tech detected that's not in SPEC.
 
-      # CODE ALIGNMENT - Decision vs Code Check
-      - id: code-alignment-check
-        name: Code Alignment Check
-        entry: python cmd/vic/vic check
-        language: system
-        types: [yaml]
-        files: '\.vibe-integrity/.*\.yaml$'
-        pass_filenames: false
-        verbose: true
-        description: "Verify code matches tech decisions in .vibe-integrity/"
-
-      # YAML VALIDATION
+  # ============================================
+  # YAML VALIDATION
+  # ============================================
+  - repo: local
+    hooks:
       - id: yaml-validate
         name: Validate YAML files
         entry: python -c "import yaml, sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]"
         language: system
         types: [yaml]
-        description: "Validate YAML syntax"
+        description: Validate YAML syntax
 
   # ============================================
-  # PRE-COMMIT HOOKS - Standard checks
+  # STANDARD PRE-COMMIT HOOKS
   # ============================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0

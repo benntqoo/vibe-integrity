@@ -18,120 +18,86 @@ VIBE-SDD 解决了 AI 辅助开发中的三个关键问题：
 # 初始化项目
 vic init --name "My Project" --tech "React,Node,PostgreSQL"
 
-# 初始化 SPEC 文档
-vic spec init --name "My Project"
-
-# 记录技术决策
-vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database" --reason "Need ACID"
-
-# 查看 SPEC 状态
-vic spec status
-
-# 运行 Gate 检查
+# 运行 Gate 检查（阻止提交直到通过）
 vic spec gate 0  # 需求完整性
 vic spec gate 1  # 架构完整性
+vic spec gate 2  # 代码对齐
+vic spec gate 3  # 测试覆盖
 
-# 验证
-vic validate
+# 推进阶段（自动运行 Gate 检查）
+vic phase advance --to 1
+
+# 记录决策
+vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database"
+vic rr --id RISK-001 --area auth --desc "JWT not validated"
 ```
 
 ## 命令
 
-| 命令 | 别名 | 描述 |
-|------|------|------|
-| `vic init` | - | 初始化 .vic-sdd/ |
-| `vic spec init` | - | 初始化 SPEC 文档 |
-| `vic spec status` | - | 查看 SPEC 状态 |
-| `vic spec gate [0-3]` | - | 运行 Gate 检查 |
-| `vic rt` | `record-tech` | 记录技术决策 |
-| `vic rr` | `record-risk` | 记录风险 |
-| `vic rd` | `record-dep` | 记录依赖 |
-| `vic check` | - | 检查代码对齐 |
-| `vic validate` | - | 完整验证 |
-| `vic status` | - | 查看项目状态 |
-| `vic search` | - | 搜索记录 |
-| `vic history` | - | 查看历史 |
-| `vic export` | - | 导出数据 |
-| `vic import` | - | 导入数据 |
+| 命令 | 描述 |
+|------|------|
+| `vic init` | 初始化 .vic-sdd/ |
+| `vic spec init` | 初始化 SPEC 文档 |
+| `vic spec status` | 查看 SPEC 状态 |
+| `vic spec gate [0-3]` | 运行 Gate 检查（验证） |
+| `vic phase advance` | 推进阶段（自动验证 gates） |
+| `vic gate check --blocking` | Pre-commit 钩子检查 |
+| `vic rt` | 记录技术决策 |
+| `vic rr` | 记录风险 |
+| `vic check` | 检查代码对齐 |
+| `vic validate` | 完整验证 |
 
-完整文档：[cmd/vic/README.md](./cmd/vic/README.md)
+完整文档：[cmd/vic-go/README.md](./cmd/vic-go/README.md)
 
 ## 开发流程
 
 ```
 定图纸 (需求)              打地基 (架构)              立规矩 (实现)
-    │                         │                        │
-vibe-think            vibe-architect         sdd-orchestrator
-    │                         │                        │
-    ▼                         ▼                        ▼
+     │                         │                        │
+requirements           architecture           sdd-orchestrator
+     │                         │                        │
+     ▼                         ▼                        ▼
 SPEC-REQUIREMENTS.md ─▶ SPEC-ARCHITECTURE.md ─▶ 实现代码
-    │                         │                        │
-    ▼                         ▼                        ▼
-   Gate 0                  Gate 1                  Gate 2 + 3
-(需求完整)              (架构完整)              (代码 + 测试)
-                                                        │
-                                                        ▼
-                                              收敛到 PRD/ARCH/PROJECT
+     │                         │                        │
+     ▼                         ▼                        ▼
+    Gate 0                  Gate 1                  Gate 2 + 3
+ (需求完整)              (架构完整)              (代码 + 测试)
 ```
 
 ## 目录结构
 
 ```
 project/
-├── cmd/
-│   └── vic/                    # CLI 工具
-│       ├── vic                  # 主程序
-│       ├── README.md           # 英文文档
-│       └── *.py                # 脚本
+├── cmd/vic-go/                 # Go CLI（编译后更快）
+│   ├── internal/
+│   │   └── commands/          # Gate 实现
+│   │       ├── gate0.go       # 需求验证
+│   │       ├── gate1.go       # 架构验证
+│   │       ├── gate2.go       # 代码对齐检查
+│   │       ├── gate3.go       # 测试覆盖检查
+│   │       └── ...
+│   └── README.md
 │
-├── skills/                         # 共 19 个 skills
-│   │
-│   ├── 自我认知 (4):              # AI 自知之明机制
-│   │   ├── knowledge-boundary/ # 知道/推断/假设/不知
-│   │   ├── pre-decision-check/ # 决策前门禁检查
-│   │   ├── signal-register/    # 证据链进度追踪
-│   │   └── exploration-journal/ # 探索过程记忆
-│   │
-│   ├── Vibe 探索 (7):             # 灵活探索流程
-│   │   ├── vibe-think/         # 需求澄清
-│   │   ├── vibe-architect/      # 技术选型 + 架构设计
-│   │   ├── vibe-redesign/      # 产品重新设计
-│   │   ├── vibe-design/        # 设计系统
-│   │   ├── vibe-debug/         # 系统性调试
-│   │   ├── vibe-qa/            # 质量保证
-│   │   └── adaptive-planning/  # 自适应重规划
-│   │
-│   └── SDD 核心 (7):              # 严格的契约驱动交付
-│       ├── sdd-orchestrator/    # 状态机 + 门禁执行
-│       ├── spec-architect/      # 将需求凝固为契约
-│       ├── spec-to-codebase/    # 从契约生成代码
-│       ├── spec-contract-diff/  # 检测契约漂移
-│       ├── spec-driven-test/    # 契约验证测试（契约先行）
-│       ├── spec-traceability/   # 故事→契约→代码→测试追溯
-│       └── sdd-release-guard/  # 最终发布门禁
+├── skills/                     # 10 个核心 skills（从 19 精简）
+│   ├── context-tracker/       # 自我认知（4→1）
+│   ├── requirements/           # 需求分析（2→1）
+│   ├── architecture/           # 技术架构
+│   ├── design-review/          # 设计系统
+│   ├── debugging/             # 调试（2→1）
+│   ├── qa/                     # 测试（3→1）
+│   ├── sdd-orchestrator/       # SDD 流水线
+│   ├── spec-architect/         # 规范合约
+│   ├── spec-contract-diff/     # 漂移检测
+│   └── spec-traceability/      # 追溯追踪
 │
-│   └── TDD 独立 (1):               # 独立的红绿重构模式
-│       └── test-driven-development/ # 单模块逻辑（无需 SPEC）
-├── docs/                       # 设计文档
-│   ├── VIC-CLI-GUIDE.md       # CLI操作指南
-│   └── *.md
-│
-└── .vic-sdd/                   # 项目记忆与规范
-    ├── SPEC-REQUIREMENTS.md    # 需求规范
-    ├── SPEC-ARCHITECTURE.md    # 架构规范
-    ├── PROJECT.md              # 项目状态
-    ├── knowledge-boundary.yaml # AI 认知地图
-    ├── decision-guardrails.yaml # 决策约束
-    ├── signal-register.yaml    # 证据链进度
-    ├── exploration-journal.yaml # 探索日志
-    ├── status/
-    │   ├── events.yaml          # 事件历史
-    │   └── state.yaml          # 当前状态
-    ├── tech/
-    │   └── tech-records.yaml   # 技术决策
-    ├── risk-zones.yaml        # 风险记录
-    ├── project.yaml            # AI 快速参考
-    └── dependency-graph.yaml   # 模块依赖
+├── docs/                       # 文档
+├── .vic-sdd/                  # 项目记忆
+│   ├── SPEC-REQUIREMENTS.md    # 需求规范
+│   ├── SPEC-ARCHITECTURE.md    # 架构规范
+│   ├── PROJECT.md              # 项目状态
+│   ├── agent-prompt.md        # AI 工作流提示
+│   └── context.yaml            # 统一上下文
+└── .pre-commit-config.yaml     # Gate 强制执行
 ```
 
 ## 核心理念
@@ -152,90 +118,83 @@ project/
 - 收敛到 PRD/ARCH/PROJECT
 
 ### 自我认知 (Self-Awareness)
-VIBE-SDD 通过 4 个机制赋予 AI"自知之明"：
-- **Knowledge Boundary** — 知道自己知道什么、推断什么、假设什么、不知道什么
-- **Pre-Decision Check** — 重大决策前的门禁检查（范围、质量、信号）
-- **Signal Register** — 证据链代替"60% 完成"来追踪进展
-- **Exploration Journal** — 记录探索过程，避免重复踩坑
+VIBE-SDD 通过统一上下文追踪赋予 AI"自知之明"：
+- **Context Tracker** — 知道/推断/假设/不知 + 信号 + 信心度
 
 ## AI 快速开始
 
 当 AI 在这个项目上开始工作时，请按以下顺序阅读：
 
 ```
-1. .vic-sdd/PROJECT.md                → 项目状态、里程碑
-2. .vic-sdd/SPEC-REQUIREMENTS.md      → 需求、验收标准
-3. .vic-sdd/SPEC-ARCHITECTURE.md      → 架构、技术栈
-4. .vic-sdd/risk-zones.yaml           → 高风险区域
+1. .vic-sdd/agent-prompt.md      → 工作流概览（会话开始时显示）
+2. .vic-sdd/PROJECT.md            → 项目状态、里程碑
+3. .vic-sdd/SPEC-REQUIREMENTS.md → 需求、验收标准
+4. .vic-sdd/SPEC-ARCHITECTURE.md → 架构、技术栈
 ```
 
 **结果**: AI 能在约 15 秒内理解项目上下文。
+
+## Skills 参考（10 个核心 Skills）
+
+| 类别 | Skill | 用途 |
+|------|-------|------|
+| 自我认知 | `context-tracker` | 统一：知道/推断/假设/不知 + 信号 |
+| Vibe | `requirements` | 用户故事、验收标准 |
+| Vibe | `architecture` | 技术选型、系统设计 |
+| Vibe | `design-review` | 设计系统、AI Slop 检测 |
+| Vibe | `debugging` | 根因分析 (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
+| QA | `qa` | TDD、测试覆盖、E2E |
+| SDD | `sdd-orchestrator` | 状态机、Gate 执行 |
+| SDD | `spec-architect` | 将需求凝固为合约 |
+| SDD | `spec-contract-diff` | 检测规范漂移 |
+| SDD | `spec-traceability` | 故事→合约→代码→测试追溯 |
+
+## Gate 强制执行
+
+### 自动 Gate 检查
+
+```bash
+# 声称"完成"前运行
+vic spec gate 0   # 验证 SPEC-REQUIREMENTS.md 结构
+vic spec gate 1   # 验证 SPEC-ARCHITECTURE.md 结构
+vic spec gate 2   # 检查代码与规范对齐
+vic spec gate 3   # 验证测试覆盖
+```
+
+### Pre-commit 钩子
+
+`.pre-commit-config.yaml` 包含 `vic gate check --blocking`，在 Gate 通过前阻止提交。
+
+### 阶段推进
+
+```bash
+vic phase advance --to 1  # 先自动运行所有必需的 Gate
+```
 
 ## 典型工作流
 
 | 场景 | 命令 |
 |------|------|
 | 开始新项目 | `vic init` |
-| 初始化 SPEC | `vic spec init` |
-| 做技术决策 | `vic rt` |
-| 发现风险 | `vic rr` |
-| 推进阶段 | `vic phase advance` |
-| 查看阶段 | `vic phase status` |
-| 通过门禁 | `vic gate pass --gate N` |
-| AI 说"完成了" | `vic check` |
-| 提交前验证 | `vic validate` |
-| 备份记忆 | `vic export` |
-
-## 相关 Skills
-
-19 个 Skills 均按 Google 5 Agent Design Patterns 分类：
-
-| 模式 | Skill | 用途 |
-|------|-------|------|
-| **Generator** | `spec-architect` | 将需求凝固为契约 |
-| **Generator** | `spec-to-codebase` | 从契约生成实现代码 |
-| **Generator** | `vibe-think` | 需求澄清与权衡分析 |
-| **Generator** | `vibe-redesign` | 产品探索 (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
-| **Generator** | `vibe-architect` | 技术选型 + 架构设计 |
-| **Generator** | `vibe-design` | 设计系统咨询 |
-| **Generator** | `test-driven-development` | 单模块逻辑的红绿重构 (TDD 独立模式) |
-| **Reviewer** | `spec-contract-diff` | 检测代码与契约的漂移 |
-| **Reviewer** | `spec-traceability` | 验证故事→契约→代码→测试链路 |
-| **Reviewer** | `spec-driven-test` | 强制 100% 测试覆盖率 |
-| **Reviewer** | `vibe-qa` | 端到端质量保证 (Playwright) |
-| **Reviewer** | `vibe-design` (Mode 2) | 80项设计审计 + AI Slop 检测 |
-| **Reviewer** | `pre-decision-check` | 所有重大决策前的门禁检查 |
-| **Reviewer** | `signal-register` | 证据链进度追踪 |
-| **Reviewer** | `knowledge-boundary` | 知识完整性审查 |
-| **Reviewer** | `exploration-journal` | 探索过程记忆（避免重复踩坑）|
-| **Reviewer** | `vibe-debug` | 根因分析 (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
-| **Reviewer** | `adaptive-planning` | 新信息矛盾时重新评估计划 |
-| **Pipeline** | `sdd-orchestrator` | 强制执行 SDD 状态机 (Ideation→Released) |
-| **Tool Wrapper** | `vic` CLI | 25个命令 — 见 [cmd/vic-go/README.md](./cmd/vic-go/README.md) |
-
-### Schema 文件
-
-Generator 模式产出均通过 JSON Schema 验证：
-
-| Schema | 用途 |
-|--------|------|
-| `skills/spec-architect/spec-requirements.schema.json` | 验证 SPEC-REQUIREMENTS.md 结构 |
-| `skills/spec-architect/spec-architecture.schema.json` | 验证 SPEC-ARCHITECTURE.md 结构 |
-| `skills/sdd-orchestrator/sdd-machine-schema.json` | 验证 SDD 报告输出 |
-| `skills/sdd-orchestrator/reviewer.interface.yaml` | 统一 Reviewer 接口 (8 个 Reviewer, 20 个 criteria) |
+| 检查需求 | `vic spec gate 0` |
+| 检查架构 | `vic spec gate 1` |
+| 检查代码对齐 | `vic spec gate 2` |
+| 检查测试覆盖 | `vic spec gate 3` |
+| 推进阶段 | `vic phase advance --to N` |
+| Pre-commit 检查 | `vic gate check --blocking` |
 
 ## 安装
 
 ```bash
-# 依赖
-pip install pyyaml
+# 从源码构建
+cd cmd/vic-go
+make build
 
-# Linux/macOS - 添加到 PATH
-chmod +x cmd/vic/vic
-sudo ln -s $(pwd)/cmd/vic/vic /usr/local/bin/vic
+# 添加到 PATH
+sudo ln -s $(pwd)/vic /usr/local/bin/vic
 
-# Windows PowerShell
-Set-Alias vic "python D:\Code\aaa\cmd\vic\vic"
+# 或者使用 Go
+go install github.com/vic-sdd/vic@latest
 ```
 
 ## 许可证

@@ -153,18 +153,55 @@ func runPhaseAdvance(cfg *config.Config, toPhase int, force bool) error {
 	// Validate gates before advancing
 	if !force {
 		fmt.Println("🔒 Validating gates before advancing...")
-		currentPhaseData, ok := phaseFile.Phases[currentPhase]
-		if ok {
-			for g := 0; g < 2; g++ {
-				gateKey := fmt.Sprintf("gate_%d", currentPhase*2+g)
-				if gate, ok := currentPhaseData.Gates[gateKey]; ok {
-					if gate.Status != "passed" {
-						return fmt.Errorf("Gate %d (%s) must pass before advancing", currentPhase*2+g, gate.Name)
-					}
+
+		// Run actual gate checks based on target phase
+		// Phase 1 requires Gate 0 (requirements)
+		// Phase 2 requires Gate 1 (architecture)
+		// Phase 3 requires Gate 2 (code alignment)
+
+		gatesToValidate := make([]int, 0)
+		for i := 0; i < toPhase; i++ {
+			gatesToValidate = append(gatesToValidate, i)
+		}
+
+		for _, phase := range gatesToValidate {
+			gateNum := phase // Each phase's first gate is 0, 1, 2, 3
+			fmt.Printf("\n📋 Running Gate %d check...\n", gateNum)
+
+			// Run the actual spec gate check
+			var gateErr error
+			switch gateNum {
+			case 0:
+				gateErr = RunGate0(cfg)
+			case 1:
+				gateErr = RunGate1(cfg)
+			case 2:
+				gateErr = RunGate2(cfg)
+			case 3:
+				gateErr = RunGate3(cfg)
+			}
+
+			if gateErr != nil {
+				fmt.Printf("\n❌ Gate %d check failed - cannot advance\n", gateNum)
+				fmt.Println("   Fix the issues and run 'vic spec gate <number>' again")
+				return fmt.Errorf("Gate %d validation failed: %w", gateNum, gateErr)
+			}
+
+			// Gate passed - mark it as passed
+			phaseData, ok := phaseFile.Phases[phase]
+			if ok {
+				gateKey := fmt.Sprintf("gate_%d", gateNum*2)
+				if gate, exists := phaseData.Gates[gateKey]; exists {
+					gate.Status = "passed"
+					gate.CheckedAt = time.Now().Format("2006-01-02")
+					phaseData.Gates[gateKey] = gate
+					phaseFile.Phases[phase] = phaseData
 				}
 			}
+			fmt.Printf("✅ Gate %d passed\n", gateNum)
 		}
-		fmt.Println("✅ All required gates passed")
+
+		fmt.Println("\n✅ All required gates validated and passed")
 	}
 
 	// Advance phase

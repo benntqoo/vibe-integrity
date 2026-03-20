@@ -563,11 +563,8 @@ When multiple agents modify the same YAML files:
 ├── SPEC-REQUIREMENTS.md    # Requirements spec
 ├── SPEC-ARCHITECTURE.md    # Architecture spec
 ├── PROJECT.md              # Project status tracking
-│
-├── knowledge-boundary.yaml  # AI 认知地图
-├── decision-guardrails.yaml # 决策约束
-├── signal-register.yaml    # 信号注册
-├── exploration-journal.yaml  # 探索日志
+├── agent-prompt.md        # AI workflow prompt (显示在每次会话开始)
+├── context.yaml           # AI context tracking (合并后的 self-awareness)
 │
 ├── status/
 │   ├── events.yaml         # Event history
@@ -577,6 +574,29 @@ When multiple agents modify the same YAML files:
 ├── risk-zones.yaml         # Risk records
 ├── project.yaml            # AI quick reference
 └── dependency-graph.yaml  # Module dependencies
+
+cmd/vic-go/
+├── internal/
+│   ├── commands/
+│   │   ├── gate0.go        # Gate 0: Requirements validation
+│   │   ├── gate1.go        # Gate 1: Architecture validation
+│   │   ├── gate2.go        # Gate 2: Code alignment
+│   │   ├── gate3.go        # Gate 3: Test coverage
+│   │   └── gate_utils.go   # Shared gate utilities
+│   └── ...
+└── ...
+
+skills/                    # 简化后的 10 个核心技能
+├── context-tracker/       # Self-awareness (合并 4 → 1)
+├── requirements/          # 需求分析 (合并 2 → 1)
+├── architecture/          # 架构设计 (保持)
+├── design-review/        # 设计审查 (改名)
+├── debugging/            # 调试 (合并 2 → 1)
+├── qa/                   # 测试 (合并 3 → 1)
+├── sdd-orchestrator/     # SDD 编排 (保持)
+├── spec-architect/       # 规范编写 (保持)
+├── spec-contract-diff/   # 差异检测 (保持)
+└── spec-traceability/    # 追溯追踪 (保持)
 
 scripts/
 └── verify.sh              # 外部验证脚本
@@ -613,48 +633,61 @@ vic validate
 
 ---
 
-## Skills Reference
+## Skills Reference (Simplified - 10 Core Skills)
 
-### Self-Awareness Skills (Always Active)
+### Self-Awareness (1 skill - consolidated)
 
 | Skill | Purpose | When to Activate |
 |-------|---------|------------------|
-| `knowledge-boundary` | AI 自知之明：knows/infers/assumes/unknown | Task BEGIN + wrap-up |
-| `pre-decision-check` | 决策前刹车：scope/quality/signals check | Task BEGIN + CHECKPOINT |
-| `signal-register` | 证据链进度：positive/warnings/blockers → confidence | After every meaningful action |
-| `exploration-journal` | 思考过程记忆：explore/tried/decided/learned | After every exploration/decision |
+| `context-tracker` | 统一的上下文追踪：known/inferred/assumed/unknown + signals + exploration | Task BEGIN + after every action + wrap-up |
 
-### SDD Skills (Feature Delivery)
+### Vibe Skills (4 skills - consolidated)
 
-| Skill | Purpose | State |
-|-------|---------|-------|
-| `sdd-orchestrator` | SDD entry point, state machine, gate enforcement | Entry of Phase 2 |
-| `spec-architect` | Freezes requirements into contracts | Ideation/Explore |
-| `spec-to-codebase` | Generates implementation from contracts | SpecCheckpoint |
-| `spec-contract-diff` | Detects drift between spec and code | Build |
-| `spec-driven-test` | Builds and enforces test gates from contracts | Build/Verify |
-| `spec-traceability` | Story-to-contract-to-code-to-test mapping | Any state |
-| `sdd-release-guard` | Final SDD release gates | ReleaseReady |
+| Skill | Purpose | When to Activate |
+|-------|---------|------------------|
+| `requirements` | 需求澄清 + 用户故事 + 验收标准 (合并 vibe-think + vibe-redesign) | Requirements unclear |
+| `architecture` | 技术选型 + 系统架构 + SPEC-ARCHITECTURE.md (合并 vibe-architect) | Need tech decisions |
+| `design-review` | 设计系统 + UI审查 (合并 vibe-design) | Building UI design system |
+| `debugging` | 系统化调试 + 根因分析 (合并 vibe-debug + adaptive-planning) | Bug fixing |
 
-### Vibe Skills (Exploration & QA)
+### QA & Testing (1 skill - consolidated)
 
-| Skill | Purpose |
-|-------|---------|
-| `vibe-think` | Requirements clarification, user story discovery |
-| `vibe-architect` | Tech selection, architecture design, SPEC-ARCHITECTURE.md |
-| `vibe-redesign` | Product redesign, scope re-evaluation |
-| `vibe-design` | Design system, UI/UX specifications |
-| `vibe-debug` | Systematic debugging with root cause analysis |
-| `vibe-qa` | Quality assurance, verification against specs |
-| `adaptive-planning` | Adaptive replanning when scope changes |
+| Skill | Purpose | When to Activate |
+|-------|---------|------------------|
+| `qa` | TDD红绿重构 + 测试覆盖 + E2E测试 (合并 vibe-qa + test-driven-development + spec-driven-test) | Test coverage, TDD cycle |
 
-### TDD Skill (Standalone Mode)
+### SDD Core (4 skills - original, proven)
 
-| Skill | Purpose | When to Use |
-|-------|---------|-------------|
-| `test-driven-development` | Red-green-refactor cycle for single-module logic | No SPEC/contracts, single file/function, internal algorithm |
+| Skill | Purpose | When to Activate |
+|-------|---------|------------------|
+| `sdd-orchestrator` | SDD状态机 + Gate执行 | Phase 2 entry, state transitions |
+| `spec-architect` | 冻结需求为合约 | SpecCheckpoint |
+| `spec-contract-diff` | 检测代码与合约漂移 | Build phase |
+| `spec-traceability` | 需求→合约→代码→测试追溯 | Any state |
 
-**Note**: `test-driven-development` is a standalone mode — NOT part of SDD pipeline. Use SDD for cross-module work, use TDD for internal logic. In layered mode, both can coexist with clear boundary (SDD = public interfaces, TDD = internal implementation).
+### Skill Consolidation Summary
+
+| Original (19) | Simplified (10) | Notes |
+|---------------|----------------|-------|
+| knowledge-boundary | context-tracker | 合并 4 个 self-awareness 技能 |
+| pre-decision-check | context-tracker | 同上 |
+| signal-register | context-tracker | 同上 |
+| exploration-journal | context-tracker | 同上 |
+| vibe-think | requirements | 合并 2 个 |
+| vibe-redesign | requirements | 同上 |
+| vibe-architect | architecture | 保持 |
+| vibe-design | design-review | 改名 |
+| vibe-debug | debugging | 合并 2 个 |
+| adaptive-planning | debugging | 同上 |
+| vibe-qa | qa | 合并 3 个 |
+| spec-driven-test | qa | 同上 |
+| test-driven-development | qa | 同上 |
+| sdd-orchestrator | sdd-orchestrator | 保持 |
+| spec-architect | spec-architect | 保持 |
+| spec-to-codebase | sdd-orchestrator | 合并 |
+| spec-contract-diff | spec-contract-diff | 保持 |
+| spec-traceability | spec-traceability | 保持 |
+| sdd-release-guard | sdd-orchestrator | 合并 |
 
 ---
 

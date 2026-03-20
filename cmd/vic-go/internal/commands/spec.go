@@ -235,62 +235,19 @@ func runSpecGate(cfg *config.Config, gate int) error {
 
 	switch gate {
 	case 0:
-		return runGate0(cfg)
+		return RunGate0(cfg)
 	case 1:
-		return runGate1(cfg)
+		return RunGate1(cfg)
 	case 2:
-		return runGate2(cfg)
+		return RunGate2(cfg)
 	case 3:
-		return runGate3(cfg)
+		return RunGate3(cfg)
 	}
 
 	return nil
 }
 
-func runGate0(cfg *config.Config) error {
-	reqExists := utils.FileExists(cfg.SpecRequirements)
-
-	if !reqExists {
-		fmt.Println("❌ SPEC-REQUIREMENTS.md not found")
-		fmt.Println("\nRun 'vic spec init' to create it")
-		return nil
-	}
-
-	fmt.Println("✅ SPEC-REQUIREMENTS.md exists")
-	fmt.Println("\n⚠️  Full requirements validation not implemented yet")
-	fmt.Println("   (Will analyze document content in future version)")
-
-	return nil
-}
-
-func runGate1(cfg *config.Config) error {
-	archExists := utils.FileExists(cfg.SpecArchitecture)
-
-	if !archExists {
-		fmt.Println("❌ SPEC-ARCHITECTURE.md not found")
-		fmt.Println("\nRun 'vic spec init' to create it")
-		return nil
-	}
-
-	fmt.Println("✅ SPEC-ARCHITECTURE.md exists")
-	fmt.Println("\n⚠️  Full architecture validation not implemented yet")
-	fmt.Println("   (Will analyze document content in future version)")
-
-	return nil
-}
-
-func runGate2(cfg *config.Config) error {
-	// This is the same as vic check
-	fmt.Println("Running code alignment check...")
-	fmt.Println("✅ Use 'vic check' for full code alignment")
-	return nil
-}
-
-func runGate3(cfg *config.Config) error {
-	fmt.Println("⚠️  Test coverage gate not implemented yet")
-	fmt.Println("   (Will integrate with test framework in future version)")
-	return nil
-}
+// Note: runGate2 and runGate3 are now in gate2.go and gate3.go
 
 // NewSpecMergeCmd merges SPEC to final docs
 func NewSpecMergeCmd(cfg *config.Config) *cobra.Command {

@@ -18,50 +18,43 @@ VIBE-SDD solves three critical problems in AI-assisted development:
 # Initialize project
 vic init --name "My Project" --tech "React,Node,PostgreSQL"
 
-# Initialize SPEC documents
-vic spec init --name "My Project"
+# Run Gate checks (blocks commit until passed)
+vic spec gate 0  # Requirements completeness
+vic spec gate 1  # Architecture completeness
+vic spec gate 2  # Code alignment
+vic spec gate 3  # Test coverage
 
-# Record a technical decision
-vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database" --reason "Need ACID"
+# Advance phase (auto-runs gate checks)
+vic phase advance --to 1
 
-# Check SPEC status
-vic spec status
-
-# Run Gate checks
-vic spec gate 0  # Requirements
-vic spec gate 1  # Architecture
-
-# Validate
-vic validate
+# Record decisions
+vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database"
+vic rr --id RISK-001 --area auth --desc "JWT not validated"
 ```
 
 ## Commands
 
-| Command | Alias | Description |
-|---------|-------|-------------|
-| `vic init` | - | Initialize .vic-sdd/ |
-| `vic spec init` | - | Initialize SPEC documents |
-| `vic spec status` | - | Show SPEC status |
-| `vic spec gate [0-3]` | - | Run Gate checks |
-| `vic rt` | `record-tech` | Record technical decision |
-| `vic rr` | `record-risk` | Record risk |
-| `vic rd` | `record-dep` | Record dependency |
-| `vic check` | - | Check code alignment |
-| `vic validate` | - | Full validation |
-| `vic status` | - | Show project status |
-| `vic search` | - | Search records |
-| `vic history` | - | Show event history |
-| `vic export` | - | Export data |
-| `vic import` | - | Import data |
+| Command | Description |
+|---------|-------------|
+| `vic init` | Initialize .vic-sdd/ |
+| `vic spec init` | Initialize SPEC documents |
+| `vic spec status` | Show SPEC status |
+| `vic spec gate [0-3]` | Run Gate checks (validation) |
+| `vic phase advance` | Advance phase (auto-validates gates) |
+| `vic gate check --blocking` | Pre-commit hook check |
+| `vic rt` | Record technical decision |
+| `vic rr` | Record risk |
+| `vic check` | Check code alignment |
+| `vic validate` | Full validation |
 
-See [cmd/vic/README.md](./cmd/vic/README.md) for full documentation.
+See [cmd/vic-go/README.md](./cmd/vic-go/README.md) for full documentation.
 
 ## Development Workflow
 
 ```
 定图纸 (Requirements)     打地基 (Architecture)    立规矩 (Implementation)
         │                          │                         │
-   vibe-think              vibe-architect            sdd-orchestrator
+   requirements             architecture             sdd-orchestrator
         │                          │                         │
         ▼                          ▼                         ▼
 SPEC-REQUIREMENTS.md  ──▶  SPEC-ARCHITECTURE.md  ──▶  Implementation
@@ -69,70 +62,42 @@ SPEC-REQUIREMENTS.md  ──▶  SPEC-ARCHITECTURE.md  ──▶  Implementation
         ▼                          ▼                         ▼
    Gate 0                    Gate 1                  Gate 2 + 3
 (Requirements)          (Architecture)           (Code + Tests)
-                                                        │
-                                                        ▼
-                                              Merge to PRD/ARCH/PROJECT
 ```
 
 ## Directory Structure
 
 ```
 project/
-├── cmd/
-│   └── vic/                    # CLI tool
-│       ├── vic                  # Main CLI
-│       ├── README.md            # English docs
-│       └── *.py                 # Scripts
+├── cmd/vic-go/                 # Go CLI (compiled, fast)
+│   ├── internal/
+│   │   └── commands/          # Gate implementations
+│   │       ├── gate0.go       # Requirements validation
+│   │       ├── gate1.go       # Architecture validation
+│   │       ├── gate2.go       # Code alignment check
+│   │       ├── gate3.go       # Test coverage check
+│   │       └── ...
+│   └── README.md
 │
-├── skills/                         # 19 skills total
-│   │
-│   ├── Self-Awareness (4):        # AI self-awareness mechanisms
-│   │   ├── knowledge-boundary/ # Knows/infers/assumes/unknown
-│   │   ├── pre-decision-check/ # Gate check before decisions
-│   │   ├── signal-register/    # Evidence-based progress
-│   │   └── exploration-journal/ # Exploration memory
-│   │
-│   ├── Vibe Exploration (7):     # Flexible exploration
-│   │   ├── vibe-think/         # Requirements clarification
-│   │   ├── vibe-architect/     # Tech selection + architecture
-│   │   ├── vibe-redesign/      # Product redesign
-│   │   ├── vibe-design/        # Design system
-│   │   ├── vibe-debug/         # Systematic debugging
-│   │   ├── vibe-qa/           # Quality assurance
-│   │   └── adaptive-planning/  # Adaptive replanning
-│   │
-│   └── SDD Core (7):              # Strict spec-driven delivery
-│       ├── sdd-orchestrator/    # State machine + gate enforcement
-│       ├── spec-architect/      # Freeze requirements into contracts
-│       ├── spec-to-codebase/    # Generate implementation
-│       ├── spec-contract-diff/  # Detect spec drift
-│       ├── spec-driven-test/    # Contract verification tests (spec-first)
-│       ├── spec-traceability/   # Story-to-code traceability
-│       └── sdd-release-guard/  # Final release gates
+├── skills/                     # 10 core skills (simplified from 19)
+│   ├── context-tracker/      # Self-awareness (4→1)
+│   ├── requirements/          # Requirements (2→1)
+│   ├── architecture/          # Tech architecture
+│   ├── design-review/         # Design system
+│   ├── debugging/            # Debug (2→1)
+│   ├── qa/                    # Testing (3→1)
+│   ├── sdd-orchestrator/      # SDD pipeline
+│   ├── spec-architect/        # Spec contracts
+│   ├── spec-contract-diff/     # Drift detection
+│   └── spec-traceability/     # Traceability
 │
-│   └── TDD Standalone (1):         # Independent red-green-refactor mode
-│       └── test-driven-development/ # Single-module logic (no SPEC needed)
-│
-├── docs/                      # Design docs
-│   ├── VIC-CLI-GUIDE.md      # CLI操作指南
-│   └── *.md
-│
-└── .vic-sdd/                  # Project memory & specs
-    ├── SPEC-REQUIREMENTS.md    # Requirements spec
-    ├── SPEC-ARCHITECTURE.md    # Architecture spec
-    ├── PROJECT.md              # Project status
-    ├── knowledge-boundary.yaml # AI 认知地图
-    ├── decision-guardrails.yaml # Decision constraints
-    ├── signal-register.yaml    # Evidence-based progress
-    ├── exploration-journal.yaml # Exploration memory
-    ├── status/
-    │   ├── events.yaml         # Event history
-    │   └── state.yaml         # Current state
-    ├── tech/
-    │   └── tech-records.yaml  # Technical decisions
-    ├── risk-zones.yaml        # Risk records
-    ├── project.yaml           # AI quick reference
-    └── dependency-graph.yaml  # Module dependencies
+├── docs/                      # Documentation
+├── .vic-sdd/                  # Project memory
+│   ├── SPEC-REQUIREMENTS.md    # Requirements
+│   ├── SPEC-ARCHITECTURE.md    # Architecture
+│   ├── PROJECT.md              # Status
+│   ├── agent-prompt.md        # AI workflow prompt
+│   └── context.yaml            # Unified context
+└── .pre-commit-config.yaml    # Gate enforcement
 ```
 
 ## Core Concepts
@@ -153,92 +118,83 @@ project/
 - Merge to PRD/ARCH/PROJECT
 
 ### 自我认知 (Self-Awareness)
-VIBE-SDD gives AI "self-awareness" through 4 mechanisms:
-- **Knowledge Boundary** — Knows what it knows, infers, assumes, or doesn't know
-- **Pre-Decision Check** — Gates before major decisions (scope, quality, signals)
-- **Signal Register** — Evidence-based progress instead of "60% done"
-- **Exploration Journal** — Remembers exploration process to avoid repeating failures
+VIBE-SDD gives AI "self-awareness" through unified context tracking:
+- **Context Tracker** — knows/infers/assumes/unknown + signals + confidence
 
 ## AI Quick Start
 
 When AI starts on this project, read in order:
 
 ```
-1. .vic-sdd/PROJECT.md          → Project status, milestones
-2. .vic-sdd/SPEC-REQUIREMENTS.md → Requirements, acceptance criteria
-3. .vic-sdd/SPEC-ARCHITECTURE.md → Architecture, tech stack
-4. .vic-sdd/risk-zones.yaml    → High-risk areas
+1. .vic-sdd/agent-prompt.md    → Workflow overview (displayed at session start)
+2. .vic-sdd/PROJECT.md         → Project status, milestones
+3. .vic-sdd/SPEC-REQUIREMENTS.md → Requirements, acceptance criteria
+4. .vic-sdd/SPEC-ARCHITECTURE.md → Architecture, tech stack
 ```
 
 **Result**: AI understands project context in ~15 seconds.
+
+## Skills Reference (10 Core Skills)
+
+| Category | Skill | Purpose |
+|----------|-------|---------|
+| Self-Awareness | `context-tracker` | Unified: known/inferred/assumed/unknown + signals |
+| Vibe | `requirements` | User stories, acceptance criteria |
+| Vibe | `architecture` | Tech selection, system design |
+| Vibe | `design-review` | Design system, AI slop detection |
+| Vibe | `debugging` | Root cause analysis (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
+| QA | `qa` | TDD, test coverage, E2E |
+| SDD | `sdd-orchestrator` | State machine, gate enforcement |
+| SDD | `spec-architect` | Freeze requirements into contracts |
+| SDD | `spec-contract-diff` | Detect spec drift |
+| SDD | `spec-traceability` | Story→contract→code→test mapping |
+
+## Gate Enforcement
+
+### Automatic Gate Checks
+
+```bash
+# Run before claiming "done"
+vic spec gate 0   # Validates SPEC-REQUIREMENTS.md structure
+vic spec gate 1   # Validates SPEC-ARCHITECTURE.md structure
+vic spec gate 2   # Checks code vs SPEC alignment
+vic spec gate 3   # Validates test coverage
+```
+
+### Pre-commit Hook
+
+`.pre-commit-config.yaml` includes `vic gate check --blocking` to prevent commits until gates pass.
+
+### Phase Advance
+
+```bash
+vic phase advance --to 1  # Auto-runs all required gates first
+```
 
 ## Workflow
 
 | Scenario | Command |
 |----------|---------|
 | Start new project | `vic init` |
-| Initialize SPEC | `vic spec init` |
-| Made a decision | `vic rt` |
-| Found a risk | `vic rr` |
-| Before progression | `vic phase advance` |
-| Check phase | `vic phase status` |
-| Pass gate | `vic gate pass --gate N` |
-| AI claims "done" | `vic check` |
-| Before commit | `vic validate` |
-| Backup memory | `vic export` |
-
-## Related Skills
-
-All 19 skills are classified by Google 5 Agent Design Patterns:
-
-| Pattern | Skill | Purpose |
-|---------|-------|---------|
-| **Generator** | `spec-architect` | Freeze requirements into contracts |
-| **Generator** | `spec-to-codebase` | Generate implementation from contracts |
-| **Generator** | `vibe-think` | Clarify requirements through trade-off analysis |
-| **Generator** | `vibe-redesign` | Product discovery (EXPANSION/SELECTIVE/HOLD/REDUCTION) |
-| **Generator** | `vibe-architect` | Tech selection + architecture design |
-| **Generator** | `vibe-design` | Design system consultation |
-| **Generator** | `test-driven-development` | Red-green-refactor for single-module logic (TDD standalone) |
-| **Reviewer** | `spec-contract-diff` | Detect drift between code and contracts |
-| **Reviewer** | `spec-traceability` | Verify story→contract→code→test linkage |
-| **Reviewer** | `spec-driven-test` | Enforce 100% test coverage |
-| **Reviewer** | `vibe-qa` | E2E quality assurance (Playwright) |
-| **Reviewer** | `vibe-design` (Mode 2) | 80-item design audit + AI slop detection |
-| **Reviewer** | `pre-decision-check` | Gate check before all major decisions |
-| **Reviewer** | `signal-register` | Evidence-based progress tracking |
-| **Reviewer** | `knowledge-boundary` | Knowledge completeness review |
-| **Reviewer** | `exploration-journal` | Exploration memory (no repeats) |
-| **Reviewer** | `vibe-debug` | Root cause analysis (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
-| **Reviewer** | `adaptive-planning` | Reassess plans when new info contradicts assumptions |
-| **Pipeline** | `sdd-orchestrator` | Enforce SDD state machine (Ideation→Released) |
-| **Tool Wrapper** | `vic` CLI | 25 commands — see [cmd/vic-go/README.md](./cmd/vic-go/README.md) |
-
-### Schema Files
-
-Generator pattern outputs are validated against JSON schemas:
-
-| Schema | Purpose |
-|--------|---------|
-| `skills/spec-architect/spec-requirements.schema.json` | Validates SPEC-REQUIREMENTS.md structure |
-| `skills/spec-architect/spec-architecture.schema.json` | Validates SPEC-ARCHITECTURE.md structure |
-| `skills/sdd-orchestrator/sdd-machine-schema.json` | Validates SDD report outputs |
-| `skills/sdd-orchestrator/reviewer.interface.yaml` | Unified Reviewer interface (8 reviewers, 20 criteria) |
-
-> 注：CLI命令详细用法见 [VIC-CLI-GUIDE.md](./docs/VIC-CLI-GUIDE.md)
+| Check requirements | `vic spec gate 0` |
+| Check architecture | `vic spec gate 1` |
+| Check code alignment | `vic spec gate 2` |
+| Check test coverage | `vic spec gate 3` |
+| Advance phase | `vic phase advance --to N` |
+| Pre-commit check | `vic gate check --blocking` |
 
 ## Installation
 
 ```bash
-# Dependencies
-pip install pyyaml
+# Build from source
+cd cmd/vic-go
+make build
 
-# Linux/macOS
-chmod +x cmd/vic/vic
-sudo ln -s $(pwd)/cmd/vic/vic /usr/local/bin/vic
+# Install to PATH
+sudo ln -s $(pwd)/vic /usr/local/bin/vic
 
-# Windows PowerShell
-Set-Alias vic "python D:\path\to\cmd\vic\vic"
+# Or use Go
+go install github.com/vic-sdd/vic@latest
 ```
 
 ## License

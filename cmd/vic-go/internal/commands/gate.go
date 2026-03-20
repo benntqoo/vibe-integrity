@@ -156,26 +156,39 @@ func runGatePass(cfg *config.Config, gateNum int, notes string) error {
 }
 
 // NewGateCheckCmd creates the gate check subcommand
+// This command is designed for pre-commit hooks and CI
 func NewGateCheckCmd(cfg *config.Config) *cobra.Command {
 	var phaseNum int
+	var blocking bool
 
 	cmd := &cobra.Command{
 		Use:   "check",
-		Short: "Check and validate gates",
-		Long:  `Check gates for a specific phase and validate requirements.`,
-		Example: `  vic gate check --phase 0
-  vic gate check            # Check current phase`,
+		Short: "Check gate status for pre-commit",
+		Long: `Check gate status and optionally block if gates are not passed.
+
+This command is designed to be used in pre-commit hooks to ensure
+all VIBE-SDD gates are passed before allowing a commit.
+
+Examples:
+  vic gate check                    # Check current phase gates
+  vic gate check --phase 1          # Check phase 1 gates
+  vic gate check --blocking          # Exit with error if gates not passed`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGateCheck(cfg, phaseNum)
+			if blocking {
+				return RunGateCheck(cfg, phaseNum)
+			}
+			return runGateStatusCheck(cfg, phaseNum)
 		},
 	}
 
 	cmd.Flags().IntVarP(&phaseNum, "phase", "p", -1, "Phase number (0-3), -1 for current")
+	cmd.Flags().BoolVarP(&blocking, "blocking", "b", false, "Exit with error if gates not passed (for pre-commit)")
 
 	return cmd
 }
 
-func runGateCheck(cfg *config.Config, phaseNum int) error {
+// runGateStatusCheck shows gate status for a phase
+func runGateStatusCheck(cfg *config.Config, phaseNum int) error {
 	phaseFile, err := utils.LoadPhaseStatus(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to load phase status: %w", err)
@@ -233,7 +246,8 @@ func runGateCheck(cfg *config.Config, phaseNum int) error {
 		fmt.Printf("   Run: vic phase advance --to %d\n", phaseNum+1)
 	} else {
 		fmt.Println("❌ Some gates not passed yet")
-		fmt.Println("   Run: vic gate pass --gate <number> to mark as passed")
+		fmt.Println("   Run: vic spec gate <number> to run gate checks")
+		fmt.Println("   Or: vic gate pass --gate <number> to manually mark as passed")
 	}
 
 	return nil
@@ -289,4 +303,88 @@ func AutoValidateAndAdvance(cfg *config.Config, toPhase int) error {
 
 	// Advance phase
 	return runPhaseAdvance(cfg, toPhase, true)
+}
+
+// RunGateCheck performs blocking gate check for pre-commit/CI
+func RunGateCheck(cfg *config.Config, phaseNum int) error {
+	fmt.Println("🚪 VIBE-SDD Gate Check (Blocking)")
+	fmt.Println("========================================")
+	fmt.Println()
+
+	// Load phase status
+	phaseFile, err := utils.LoadPhaseStatus(cfg)
+	if err != nil {
+		// Phase status file doesn't exist - this is a new project
+		fmt.Println("⚠️  No phase status found (run 'vic init' first)")
+		fmt.Println("   Allowing commit for new projects...")
+		fmt.Println()
+		return nil
+	}
+
+	// Determine which phase we're in
+	if phaseNum < 0 {
+		phaseNum = phaseFile.CurrentPhase
+	}
+
+	// Check gates for current and previous phases
+	allPassed := true
+
+	for i := 0; i <= phaseNum; i++ {
+		phase, ok := phaseFile.Phases[i]
+		if !ok {
+			continue
+		}
+
+		// Check at least the first gate for each phase
+		gateKey := fmt.Sprintf("gate_%d", i*2)
+		gate, ok := phase.Gates[gateKey]
+		if !ok {
+			continue
+		}
+
+		icon := "⏳"
+		if gate.Status == "passed" {
+			icon = "✅"
+		} else {
+			icon = "❌"
+			allPassed = false
+		}
+
+		required := ""
+		if i <= phaseNum {
+			required = " [REQUIRED]"
+		}
+
+		fmt.Printf("[%s] Gate %d: %s%s\n", icon, i*2, gate.Name, required)
+		fmt.Printf("     Status: %s\n", gate.Status)
+	}
+
+	fmt.Println()
+	fmt.Println("========================================")
+
+	if allPassed {
+		fmt.Println("✅ All required gates passed - commit allowed")
+		fmt.Println()
+		return nil
+	}
+
+	fmt.Println("❌ Gate check FAILED - some required gates not passed")
+	fmt.Println()
+	fmt.Println("To pass gates:")
+	for i := 0; i <= phaseNum; i++ {
+		phase, ok := phaseFile.Phases[i]
+		if !ok {
+			continue
+		}
+		gateKey := fmt.Sprintf("gate_%d", i*2)
+		gate, ok := phase.Gates[gateKey]
+		if ok && gate.Status != "passed" {
+			fmt.Printf("   vic spec gate %d\n", i)
+		}
+	}
+	fmt.Println()
+	fmt.Println("⚠️  To bypass (NOT recommended):")
+	fmt.Println("   git commit --no-verify -m 'message'")
+
+	return fmt.Errorf("gate check failed: required gates not passed")
 }
