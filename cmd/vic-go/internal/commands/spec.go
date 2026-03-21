@@ -102,6 +102,7 @@ func NewSpecCmd(cfg *config.Config) *cobra.Command {
 	cmd.AddCommand(NewSpecWatchCmd(cfg))
 	cmd.AddCommand(NewSpecChangesCmd(cfg))
 	cmd.AddCommand(NewSpecDiffCmd(cfg))
+	cmd.AddCommand(NewSpecHashCmd(cfg))
 
 	return cmd
 }

@@ -115,6 +115,7 @@ make run ARGS="--help"
 | `spec init` | - | Initialize SPEC |
 | `spec status` | - | Show SPEC status |
 | `spec gate` | - | Run SPEC gate |
+| `spec hash` | - | Check SPEC file hashes and detect changes |
 | `auto start` | - | Start autonomous mode |
 | `auto status` | - | Show auto mode status |
 | `auto pause` | - | Pause autonomous mode |
@@ -127,6 +128,11 @@ make run ARGS="--help"
 | `product record` | - | Record product redesign |
 | `product list` | - | List product decisions |
 | `product modes` | - | Show four modes |
+| `deps scan` | - | Scan and generate dependency graph |
+| `deps list` | - | List all modules |
+| `deps search` | - | Search modules by pattern |
+| `deps impact` | - | Show impact of changing a module |
+| `deps callers` | - | Show who calls a module |
 | `replan trigger` | - | Trigger adaptive replan |
 | `replan list` | - | List replan history |
 | `replan show` | - | Show replan details |
@@ -302,6 +308,86 @@ vic slop fix
 | D | Major issues | ❌ Needs fixing |
 
 **Auto-fix** replaces detected patterns with better alternatives. Always review changes before committing.
+
+## Dependency Analysis (Phase 5 Enhancement)
+
+Analyze internal module dependencies to understand code structure:
+
+```bash
+# Scan project and generate dependency graph
+vic deps scan
+
+# List all modules
+vic deps list
+
+# Search for modules matching a pattern
+vic deps search auth
+
+# Show impact of changing a module
+vic deps impact internal/utils
+
+# Show who calls a module
+vic deps callers internal/utils
+```
+
+**Supported Languages:**
+- ✅ Go (using `go/ast`)
+- ✅ Python (using regex)
+- ✅ JavaScript (using regex)
+- ✅ TypeScript (using regex)
+
+**What it does:**
+- Scans source files by directory (each directory = one module)
+- Extracts import statements using language-specific parsers
+- Identifies internal dependencies vs external packages
+- Builds bidirectional dependency graph (depends_on + called_by)
+- Outputs to `.vic-sdd/dependency-graph.yaml`
+
+**Design Philosophy:**
+This tool follows the **dynamic context discovery** pattern:
+- `vic deps scan` generates an index file (not loaded into AI context by default)
+- `vic deps search/impact/callers` provide on-demand queries
+- AI coding agents can call these tools when needed, avoiding context explosion
+
+**Example: Impact Analysis**
+```bash
+$ vic deps impact internal/utils
+
+🔍 Impact Analysis: internal/utils
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📁 Type: library
+
+🟢 Direct Callers (directly affected):
+   └─ internal/commands
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Impact Summary:
+   🟢 Direct impact: 1 modules
+   ⚠️  Risk Level: Low
+```
+
+**Example: Search**
+```bash
+$ vic deps search utils
+
+🔍 Search results for: utils
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 internal/utils (library) [Go]
+   depends on:
+      └─ internal/config
+      └─ internal/types
+   called by:
+      └─ internal/commands
+
+✅ Found 1 matching module(s)
+```
+
+**Use cases:**
+- Impact analysis: what changes affect what modules
+- Identify circular dependencies
+- Understand code architecture at a glance
+- Help AI coding agents understand module relationships (on-demand)
 
 ## TDD Mode (Phase 4 Enhancement)
 

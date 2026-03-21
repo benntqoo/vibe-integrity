@@ -1,5 +1,7 @@
 {
-  "spec_requirements": "f0ff5249548e3c12532d1d26296ea35fb54593333753962feafd19587eaba994",
-  "spec_architecture": "5b832ba31874c8e3e1daa3525afcafdc600a4bc3759a7339e35bce50aa095912",
-  "design": ""
+  "last_check": "2026-03-21T03:08:11Z",
+  "hashes": {
+    "SPEC-ARCHITECTURE.md": "5b832ba31874c8e3e1daa3525afcafdc600a4bc3759a7339e35bce50aa095912",
+    "SPEC-REQUIREMENTS.md": "f0ff5249548e3c12532d1d26296ea35fb54593333753962feafd19587eaba994"
+  }
 }

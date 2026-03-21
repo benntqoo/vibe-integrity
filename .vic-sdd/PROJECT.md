@@ -205,7 +205,14 @@
 - 文档: [URL]
 - 监控: [URL]
 
-### B. 快速命令
+### B. 治理文档
+
+| 文档 | 说明 |
+|------|------|
+| [constitution.yaml](./constitution.yaml) | VIBE-SDD 核心规则 (不可违反) |
+| [agent-prompt.md](./agent-prompt.md) | AI 工作流提示 |
+
+### C. 快速命令
 
 ```bash
 # 查看项目状态

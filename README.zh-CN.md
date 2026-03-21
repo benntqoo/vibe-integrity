@@ -40,6 +40,7 @@ vic rr --id RISK-001 --area auth --desc "JWT not validated"
 | `vic spec init` | 初始化 SPEC 文档 |
 | `vic spec status` | 查看 SPEC 状态 |
 | `vic spec gate [0-3]` | 运行 Gate 检查（验证） |
+| `vic spec hash` | 检查 SPEC Hash 并检测变更 |
 | `vic phase advance` | 推进阶段（自动验证 gates） |
 | `vic gate check --blocking` | Pre-commit 钩子检查 |
 | `vic rt` | 记录技术决策 |
@@ -79,6 +80,7 @@ project/
 │   └── README.md
 │
 ├── skills/                     # 10 个核心 skills（从 19 精简）
+│   ├── constitution-check/     # 合规检查（新增）
 │   ├── context-tracker/       # 自我认知（4→1）
 │   ├── requirements/           # 需求分析（2→1）
 │   ├── architecture/           # 技术架构

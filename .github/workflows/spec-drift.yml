@@ -1,0 +1,108 @@
+name: SPEC Drift Detection
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  # Manual trigger for ad-hoc checks
+  workflow_dispatch:
+
+jobs:
+  spec-drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build vic
+        run: |
+          cd cmd/vic-go
+          go build -o vic .
+          echo "$(pwd)" >> $GITHUB_PATH
+
+      - name: Check SPEC Hash
+        id: hash-check
+        run: |
+          echo "### SPEC Hash Check" >> $GITHUB_STEP_SUMMARY
+          vic spec hash >> $GITHUB_STEP_SUMMARY 2>&1
+          echo "hash_exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Run Constitution Check
+        id: constitution
+        run: |
+          echo "### Constitution Check" >> $GITHUB_STEP_SUMMARY
+          echo "Checking .vic-sdd/constitution.yaml rules..." >> $GITHUB_STEP_SUMMARY
+          
+          # Check SPEC-FIRST: SPEC files should exist and be non-empty
+          if [ -s ".vic-sdd/SPEC-REQUIREMENTS.md" ] && [ -s ".vic-sdd/SPEC-ARCHITECTURE.md" ]; then
+            echo "✅ SPEC files exist" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ SPEC files missing or empty" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          # Check for TODO/FIXME in code
+          TODO_COUNT=$(grep -r "TODO\|FIXME" --include="*.go" cmd/ internal/ 2>/dev/null | wc -l)
+          if [ "$TODO_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $TODO_COUNT TODO/FIXME in code" >> $GITHUB_STEP_SUMMARY
+            echo "TODO_COUNT=$TODO_COUNT" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No TODO/FIXME found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run Gate 2 (Code Alignment)
+        id: gate2
+        run: |
+          echo "### Gate 2: Code Alignment" >> $GITHUB_STEP_SUMMARY
+          vic spec gate 2 >> $GITHUB_STEP_SUMMARY 2>&1
+          GATE2_EXIT=$?
+          echo "gate2_exit=$GATE2_EXIT" >> $GITHUB_OUTPUT
+          
+          if [ $GATE2_EXIT -ne 0 ]; then
+            echo "❌ Code vs SPEC alignment check FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Action required**: Update SPEC files or fix code alignment." >> $GITHUB_STEP_SUMMARY
+            echo "Run locally: `vic spec diff` to see changes." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Gate 2 PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run Gate 3 (Test Coverage)
+        id: gate3
+        run: |
+          echo "### Gate 3: Test Coverage" >> $GITHUB_STEP_SUMMARY
+          vic spec gate 3 >> $GITHUB_STEP_SUMMARY 2>&1
+          GATE3_EXIT=$?
+          echo "gate3_exit=$GATE3_EXIT" >> $GITHUB_OUTPUT
+          
+          if [ $GATE3_EXIT -ne 0 ]; then
+            echo "⚠️  Test coverage below threshold" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Gate 3 PASSED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Summary
+        run: |
+          echo "## VIBE-SDD SPEC Drift Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| SPEC Files | $([ -s '.vic-sdd/SPEC-REQUIREMENTS.md' ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Constitution | $([ '${{ needs.constitution.outputs.TODO_COUNT }}' == '0' ] && echo '✅' || echo '⚠️ TODO') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate 2 | $([ '${{ steps.gate2.outputs.gate2_exit }}' == '0' ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate 3 | $([ '${{ steps.gate3.outputs.gate3_exit }}' == '0' ] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+
+      # Fail the build if critical gates fail
+      - name: Fail on Critical Issues
+        if: steps.gate2.outputs.gate2_exit != '0'
+        run: |
+          echo "::error::SPEC drift detected! Code is out of alignment with SPEC."
+          echo "::error::Run 'vic spec diff' locally to see what changed."
+          echo "::error::Then update SPEC or fix code to align."
+          exit 1

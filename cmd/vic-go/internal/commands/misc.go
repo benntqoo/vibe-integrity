@@ -134,6 +134,7 @@ func runCheck(cfg *config.Config, jsonOutput bool, categoryFilter string) error 
 	if failCount > 0 {
 		fmt.Println("\n⚠️  Some decisions are not reflected in code!")
 		fmt.Println("   Review failed checks and either update code or records.")
+		showCheckUpdateRecommendation(failCount)
 	}
 
 	if passCount == 0 && unknownCount > 0 {
@@ -637,4 +638,25 @@ func toString(v interface{}) string {
 		return s
 	}
 	return ""
+}
+
+// showCheckUpdateRecommendation prints recommended actions when check fails
+func showCheckUpdateRecommendation(failCount int) {
+	fmt.Println()
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Println("📋 SPEC UPDATE RECOMMENDATION")
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Printf("Found %d decision(s) not reflected in code.\n\n", failCount)
+	fmt.Println("To resolve this, choose one of the following:\n")
+	fmt.Println("1️⃣  Update SPEC (Recommended)")
+	fmt.Println("    $ vic spec update --file SPEC-ARCHITECTURE.md --section \"[section]\"")
+	fmt.Println("    Then: vic check\n")
+	fmt.Println("2️⃣  Update code to match decisions")
+	fmt.Println("    $ git diff [affected files]")
+	fmt.Println("    Then: Re-implement correctly\n")
+	fmt.Println("3️⃣  Document as accepted drift (requires approval)")
+	fmt.Println("    $ vic rr --id DRIFT-[DATE] --desc \"[description]\"")
+	fmt.Println("    ⚠️  Only for emergency hotfixes\n")
+	fmt.Println("For more details, see: skills/constitution-check/SKILL.md")
+	fmt.Println("════════════════════════════════════════════════════════════")
 }

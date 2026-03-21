@@ -40,6 +40,7 @@ vic rr --id RISK-001 --area auth --desc "JWT not validated"
 | `vic spec init` | Initialize SPEC documents |
 | `vic spec status` | Show SPEC status |
 | `vic spec gate [0-3\|1.5]` | Run Gate checks (validation) |
+| `vic spec hash` | Check SPEC hashes and detect changes |
 | `vic spec watch` | Monitor SPEC changes and auto-run drift detection |
 | `vic spec diff` | Detect SPEC changes since last check |
 | `vic spec changes` | Show SPEC change history |

@@ -115,6 +115,11 @@ cmd/vic-go/
 │   │   ├── init.go       # vic init
 │   │   ├── record.go     # vic record
 │   │   ├── spec.go       # vic spec
+│   │   ├── hash.go       # vic spec hash (SPEC变更检测)
+│   │   ├── gate0.go      # Gate 0 检查
+│   │   ├── gate1.go      # Gate 1 检查
+│   │   ├── gate2.go      # Gate 2 检查
+│   │   ├── gate3.go      # Gate 3 检查
 │   │   ├── check.go      # vic check
 │   │   ├── status.go     # vic status
 │   │   ├── misc.go       # 其他命令
@@ -148,6 +153,7 @@ cmd/vic-go/
 | vic validate | - | 完整验证 | done |
 | vic spec init | - | 初始化SPEC | done |
 | vic spec gate | - | Gate检查 | done |
+| vic spec hash | - | SPEC Hash检查+变更检测 | done |
 
 ## 4. 命令设计
 
@@ -163,6 +169,7 @@ cmd/vic-go/
 | vic validate | 完整验证 | done |
 | vic spec init | 初始化SPEC | done |
 | vic spec gate | Gate检查 | done |
+| vic spec hash | SPEC Hash检查+变更检测 | done |
 | vic fold | 事件折叠 | done |
 | vic search | 搜索 | done |
 | vic history | 历史记录 | done |
@@ -182,6 +189,11 @@ cmd/vic-go/
 | init.go | vic init - 初始化项目 | utils, config |
 | record.go | vic record - 记录决策/风险 | utils, config |
 | spec.go | vic spec - SPEC文档管理 | utils, config |
+| hash.go | vic spec hash - SPEC变更检测 | utils |
+| gate0.go | vic spec gate 0 - 需求完整性 | utils |
+| gate1.go | vic spec gate 1 - 架构完整性 | utils |
+| gate2.go | vic spec gate 2 - 代码对齐 | checker |
+| gate3.go | vic spec gate 3 - 测试覆盖 | utils |
 | check.go | vic check - 代码对齐检查 | checker |
 | status.go | vic status - 状态显示 | config |
 | fold.go | vic fold - 事件折叠 | utils |

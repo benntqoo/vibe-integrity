@@ -96,9 +96,45 @@ func RunGate2(cfg *config.Config) error {
 
 	fmt.Printf("❌ Gate 2 FAILED - %d/%d checks failed\n", len(results)-passedCount, len(results))
 	fmt.Println()
-	fmt.Println("Edit code to align with SPEC-ARCHITECTURE.md, then run 'vic spec gate 2' again")
+
+	// Collect failed check names for recommendation
+	failedChecks := make([]string, 0)
+	for _, r := range results {
+		if !r.passed {
+			failedChecks = append(failedChecks, r.checkName)
+		}
+	}
+	showSpecUpdateRecommendation(failedChecks)
 
 	return nil
+}
+
+// showSpecUpdateRecommendation prints recommended actions when drift is detected
+func showSpecUpdateRecommendation(affectedSections []string) {
+	fmt.Println("════════════════════════════════════════════════════════════")
+	fmt.Println("📋 SPEC UPDATE RECOMMENDATION")
+	fmt.Println("════════════════════════════════════════════════════════════")
+
+	if len(affectedSections) > 0 {
+		fmt.Printf("Drift detected in: %s\n\n", strings.Join(affectedSections, ", "))
+	}
+
+	fmt.Println("To resolve this drift, choose one of the following:\n")
+
+	fmt.Println("1️⃣  Update SPEC (Recommended)")
+	fmt.Println("    $ vic spec update --file SPEC-ARCHITECTURE.md --section \"[section]\"")
+	fmt.Println("    Then: vic spec gate 2\n")
+
+	fmt.Println("2️⃣  Revert code changes")
+	fmt.Println("    $ git diff [affected files]")
+	fmt.Println("    Then: Revert and re-implement correctly\n")
+
+	fmt.Println("3️⃣  Document as accepted drift (requires approval)")
+	fmt.Println("    $ vic rr --id DRIFT-[DATE] --desc \"[description]\"")
+	fmt.Println("    ⚠️  Only for emergency hotfixes\n")
+
+	fmt.Println("For more details, see: skills/constitution-check/SKILL.md")
+	fmt.Println("════════════════════════════════════════════════════════════")
 }
 
 // checkTechStackAlignment verifies tech stack declared in SPEC exists in code

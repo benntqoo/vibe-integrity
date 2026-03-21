@@ -43,8 +43,41 @@
 ║  • Record tech decisions: vic rt --id XXX --title "..."               ║
 ║  • Record risks: vic rr --id RISK-XXX --desc "..."                   ║
 ║                                                                       ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  ⚠️  Hard Lines (Non-Negotiable):                                      ║
+║                                                                       ║
+║  • NEVER skip the Session Start Checklist                             ║
+║  • NEVER ignore SPEC changes detected by vic spec hash                ║
+║  • NEVER continue if spec_unaligned blocker is active                  ║
+║  • If confidence < 0.4 → STOP and resolve blockers                     ║
+║                                                                       ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
+
+## ⚠️ SESSION START CHECKLIST (MANDATORY)
+
+Before starting any work, you MUST confirm ALL of the following:
+
+```
+□ I have run: vic spec status
+□ I have confirmed current Gate status
+□ I have read .vic-sdd/context.yaml
+□ I have resolved all known blockers
+□ If there are any ASSUMED items in context.yaml → I have marked them as blockers and asked for confirmation
+```
+
+**If you skip this checklist and start coding directly, you are violating VIBE-SDD workflow.**
+
+## 🔍 SPEC CHANGE DETECTION
+
+Run: `vic spec hash`
+
+If output shows "SPEC changed since last session":
+1. Read: `vic spec diff`
+2. List the SPEC sections that changed
+3. Update `.vic-sdd/context.yaml` with the changes
+4. Confirm: "SPEC sections affected by this session: [list sections]"
+5. Only then continue with your work
 
 ## Phase Descriptions
 
@@ -59,11 +92,15 @@
 
 | Skill | When to Use |
 |-------|-------------|
+| `constitution-check` | Before plans, reviews, commits (MANDATORY) |
+| `context-tracker` | At task BEGIN, after actions, at task END |
 | `requirements` | Clarify vague requirements |
 | `architecture` | Design tech stack |
 | `design-review` | Build UI design system |
 | `debugging` | Fix bugs systematically |
 | `qa` | TDD and test coverage |
+| `sdd-orchestrator` | Manage SDD workflow |
+| `spec-contract-diff` | Detect code vs SPEC drift |
 | `context-tracker` | Track AI self-awareness |
 | `sdd-orchestrator` | Manage SDD workflow |
 
@@ -88,3 +125,10 @@ vic phase advance --to 1
 vic rt --id DB-001 --title "PostgreSQL" --decision "Primary DB"
 vic rr --id RISK-001 --desc "JWT not validated"
 ```
+
+## ⚠️ Hard Lines (Non-Negotiable)
+
+• NEVER skip the Session Start Checklist
+• NEVER ignore SPEC changes detected by `vic spec hash`
+• NEVER continue if `spec_unaligned` blocker is active
+• If confidence < 0.4 → STOP and resolve blockers

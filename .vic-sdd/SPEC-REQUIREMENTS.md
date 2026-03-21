@@ -39,6 +39,9 @@
 - [ ] SPEC文档管理功能完成 (vic spec init, vic spec gate)
 - [ ] Gate检查机制正常运行
 - [ ] 代码对齐检查功能完成
+- [ ] SPEC Hash检查功能完成 (vic spec hash)
+- [ ] Constitution机制运行正常 (constitution.yaml)
+- [ ] AI认知膨胀防护机制正常
 
 ---
 
@@ -54,6 +57,8 @@
 | US-004 | 作为Project Owner，我想要查看项目当前状态和进度，以便掌控全局 | P1 | Phase 1 |
 | US-005 | 作为AI开发者，我想要SPEC文档管理功能，以便规范化需求 | P1 | Phase 2 |
 | US-006 | 作为AI开发者，我想要代码对齐检查，以便确保实现符合设计 | P1 | Phase 2 |
+| US-007 | 作为AI开发者，我想要SPEC Hash检查，以便检测SPEC变更 | P1 | Phase 2 |
+| US-008 | 作为AI开发者，我想要Constitution检查，以便防止随意开发 | P1 | Phase 2 |
 
 **模板**: 作为 [角色]，我想要 [功能]，以便 [价值]
 
@@ -71,6 +76,8 @@
 | F-004 | 项目状态查看 | US-004 | Phase 1 | pending |
 | F-005 | SPEC文档管理 | US-005 | Phase 2 | pending |
 | F-006 | 代码对齐检查 | US-006 | Phase 2 | pending |
+| F-007 | SPEC Hash检查 | US-007 | Phase 2 | done |
+| F-008 | Constitution检查 | US-008 | Phase 2 | done |
 
 ### 3.2 功能详细
 

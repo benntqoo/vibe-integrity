@@ -1,97 +1,77 @@
-# Context Tracker Skill
+---
+name: context-tracker
+description: Tracks AI knowledge state and confidence at every moment.
+metadata:
+  domain: engineering
+  version: "1.0"
+  tags: [self-awareness, monitoring, confidence, blockers]
+  examples:
+    - "At task BEGIN"
+    - "After every meaningful action"
+    - "Before task completion"
+  priority: critical
+  auto_activate: true
+---
+
+# Context Tracker
 
 ## Overview
 
-Consolidated self-awareness skill combining:
-- knowledge-boundary
-- pre-decision-check  
-- signal-register
-- exploration-journal
+Unified self-awareness skill. Tracks what AI knows, infers, assumes, and doesn't know. Maintains confidence score and identifies blockers.
 
-## Single File: `.vic-sdd/context.yaml`
+**Replaces:** knowledge-boundary.yaml, decision-guardrails.yaml, signal-register.yaml, exploration-journal.yaml
+**State file:** `.vic-sdd/context.yaml`
 
+## L1: When to Use
+
+| Moment | Use Case |
+|--------|----------|
+| Task BEGIN | Initialize context, check blockers |
+| After every action | Record signals, recalculate confidence |
+| After decisions | Document alternatives and choices |
+| Task END | Finalize context, emit confidence |
+
+## L2: How to Use
+
+### Step 1: Read current context
+Read `.vic-sdd/context.yaml`
+
+### Step 2: Update knowledge map
+- Move `known` → verified facts (highest confidence)
+- Move `inferred` → inferred from patterns (needs verification)
+- Move `assumed` → assumptions (high risk, verify soon)
+- Move `unknown` → knowledge gaps (blockers)
+
+### Step 3: Record signals
 ```yaml
-# Context Tracking - Single Source of Truth
-# =========================================
-
-known:      # Verified facts (highest confidence)
-  - "vic CLI is Go-based"
-  - "SPEC files are markdown"
-
-inferred:   # Inferred from patterns (needs verification)
-  - "User wants CLI tool improvements"
-
-assumed:    # Assumptions (high risk, verify soon)
-  - "CLI is primary interface"
-
-unknown:    # Knowledge gaps (blockers)
-  - []
-
 signals:
-  positive: []
-  warnings: []
-  blockers: []
-
-confidence: 1.0  # Calculated: (positive - warnings*0.3 - blockers*0.5) / max_signals
-
-exploration:
-  entries:
-    - action: explore
-      topic: "current project structure"
-      timestamp: "2026-03-19"
-    - action: decided
-      topic: "consolidate skills to 10"
-      alternatives: ["keep 19", "merge to 7", "merge to 10"]
-      choice: "merge to 10"
-      reason: "balance between simplicity and coverage"
+  positive: []    # code_created, test_passed, refactoring_done
+  warnings: []    # assumption_made, edge_case_found
+  blockers: []     # spec_unaligned, unknown_blocking
 ```
 
-## When to Use
-
-### Task BEGIN
-
-```markdown
-1. Read .vic-sdd/context.yaml
-2. Update known/inferred/assumed/unknown for current task
-3. Calculate confidence
-4. If blockers >= 2 → STOP, ask human
-5. If confidence < 0.4 → pause, resolve blockers
+### Step 4: Calculate confidence
 ```
+confidence = (positive - warnings×0.3 - blockers×0.5) / max_signals
 
-### After Every Meaningful Action
-
-```markdown
-1. Signal register: Record positive/warning/blocker
-2. Recalculate confidence
-3. Update exploration journal
-```
-
-### Task END (Wrap-up)
-
-```markdown
-1. Move inferred → known (if verified)
-2. Move assumed → inferred/known (if validated)
-3. Emit final confidence score
-```
-
-## Confidence Thresholds
-
-```
 > 0.7    → 🟢 HIGH   → Continue
 0.4-0.7  → 🟡 MODERATE → Continue, monitor warnings
 < 0.4    → 🔴 LOW   → Pause, resolve blockers
 blockers >= 2 → 🛑 STOP → Ask human
 ```
 
-## Quick Reference
+### Step 5: Write context.yaml
+Update `.vic-sdd/context.yaml` with changes
 
-| Action | What to Record |
-|--------|---------------|
-| explored | What you discovered |
-| tried | Methods that worked/failed |
-| decided | Choice + alternatives + reason |
-| learned | Lessons to remember |
+[参考: references/confidence-formula.md]
 
-## File Location
+## Blocker Types
 
-`.vic-sdd/context.yaml`
+| Blocker | Meaning | Action |
+|---------|---------|--------|
+| `spec_unaligned` | Code vs SPEC mismatch | Must fix or update SPEC |
+| `unknown_blocking` | Unknown issue blocking progress | Ask human |
+| `decision_blocking` | Need decision to continue | Request clarification |
+| `env_blocking` | Environment issue | Fix environment |
+
+[参考: references/blocker-types.md]
