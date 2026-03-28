@@ -30,6 +30,9 @@ vic phase advance --to 1
 # 记录决策
 vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database"
 vic rr --id RISK-001 --area auth --desc "JWT not validated"
+
+# 语义搜索（需要 embedding 支持）
+vic ask "认证系统是如何工作的？"
 ```
 
 ## 命令
@@ -37,153 +40,147 @@ vic rr --id RISK-001 --area auth --desc "JWT not validated"
 | 命令 | 描述 |
 |------|------|
 | `vic init` | 初始化 .vic-sdd/ |
+| `vic status` | 显示项目状态 |
 | `vic spec init` | 初始化 SPEC 文档 |
 | `vic spec status` | 查看 SPEC 状态 |
 | `vic spec gate [0-3]` | 运行 Gate 检查（验证） |
 | `vic spec hash` | 检查 SPEC Hash 并检测变更 |
+| `vic spec diff` | 检测自上次检查以来的 SPEC 变更 |
 | `vic phase advance` | 推进阶段（自动验证 gates） |
 | `vic gate check --blocking` | Pre-commit 钩子检查 |
-| `vic rt` | 记录技术决策 |
-| `vic rr` | 记录风险 |
+| `vic rt` / `vic record tech` | 记录技术决策 |
+| `vic rr` / `vic record risk` | 记录风险 |
 | `vic check` | 检查代码对齐 |
 | `vic validate` | 完整验证 |
+| `vic ask <查询>` | 代码库语义搜索 |
 
-完整文档：[cmd/vic-go/README.md](./cmd/vic-go/README.md)
+完整文档：[docs/VIC-CLI-GUIDE.md](./docs/VIC-CLI-GUIDE.md)
 
 ## 开发流程
 
 ```
-定图纸 (需求)              打地基 (架构)              立规矩 (实现)
-     │                         │                        │
-requirements           architecture           sdd-orchestrator
-     │                         │                        │
-     ▼                         ▼                        ▼
-SPEC-REQUIREMENTS.md ─▶ SPEC-ARCHITECTURE.md ─▶ 实现代码
-     │                         │                        │
-     ▼                         ▼                        ▼
-    Gate 0                  Gate 1                  Gate 2 + 3
- (需求完整)              (架构完整)              (代码 + 测试)
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+    │         │            │             │        │          │
+    └─────────┴────────────┘             └────────┴──────────┘
+         spec-workflow                        implementation
+                                              unified-workflow
 ```
+
+### 5 个核心 Skills
+
+| Skill | 自动激活 | 职责 |
+|-------|----------|------|
+| `context-tracker` | ✅ 是 | AI 自我认知、信心度追踪 |
+| `spec-workflow` | 否 | 需求分析 → 架构设计 → SPEC 冻结 |
+| `implementation` | 否 | 代码/调试/测试/SPEC 对齐 |
+| `unified-workflow` | 否 | SDD 编排/宪法规则/追溯 |
+| `quick` | 否 | 简单单文件变更 |
 
 ## 目录结构
 
 ```
 project/
 ├── cmd/vic-go/                 # Go CLI（编译后更快）
-│   ├── internal/
-│   │   └── commands/          # Gate 实现
-│   │       ├── gate0.go       # 需求验证
-│   │       ├── gate1.go       # 架构验证
-│   │       ├── gate2.go       # 代码对齐检查
-│   │       ├── gate3.go       # 测试覆盖检查
-│   │       └── ...
-│   └── README.md
+│   ├── main.go
+│   └── internal/
+│       ├── commands/           # CLI 命令实现
+│       │   ├── root.go
+│       │   ├── spec.go
+│       │   ├── gate.go
+│       │   ├── gate0-3.go      # Gate 实现
+│       │   └── ...
+│       ├── config/             # 配置管理 (Viper)
+│       ├── checker/            # 代码对齐检查
+│       ├── types/              # 类型定义
+│       └── embedding/          # 语义搜索
+│           ├── store.go        # SQLite 向量存储
+│           ├── embedder.go     # 嵌入生成
+│           └── chunker/        # 代码分块
 │
-├── skills/                     # 10 个核心 skills（从 19 精简）
-│   ├── constitution-check/     # 合规检查（新增）
-│   ├── context-tracker/       # 自我认知（4→1）
-│   ├── requirements/           # 需求分析（2→1）
-│   ├── architecture/           # 技术架构
-│   ├── design-review/          # 设计系统
-│   ├── debugging/             # 调试（2→1）
-│   ├── qa/                     # 测试（3→1）
-│   ├── sdd-orchestrator/       # SDD 流水线
-│   ├── spec-architect/         # 规范合约
-│   ├── spec-contract-diff/     # 漂移检测
-│   └── spec-traceability/      # 追溯追踪
+├── skills/                     # 5 个核心 skills
+│   ├── context-tracker/        # 自我认知（自动激活）
+│   ├── spec-workflow/          # 需求/架构/SPEC
+│   ├── implementation/         # 代码/调试/测试
+│   ├── unified-workflow/       # SDD 编排
+│   └── quick/                  # 简单变更
 │
 ├── docs/                       # 文档
-├── .vic-sdd/                  # 项目记忆
+│   ├── VIC-CLI-GUIDE.md        # CLI 参考
+│   ├── SDD-PROCESS-CN.md       # SDD 流程规范
+│   └── ...
+│
+├── .vic-sdd/                   # 项目记忆
 │   ├── SPEC-REQUIREMENTS.md    # 需求规范
 │   ├── SPEC-ARCHITECTURE.md    # 架构规范
 │   ├── PROJECT.md              # 项目状态
-│   ├── agent-prompt.md        # AI 工作流提示
-│   └── context.yaml            # 统一上下文
+│   ├── constitution.yaml       # 不可违反规则
+│   ├── context.yaml            # AI 自我认知状态
+│   ├── agent-prompt.md         # AI 工作流提示
+│   └── status/
+│       ├── spec-hash.json      # SPEC 文件哈希
+│       ├── gate-status.yaml    # Gate 检查状态
+│       └── state.yaml          # 系统状态
+│
 └── .pre-commit-config.yaml     # Gate 强制执行
 ```
 
-## 核心理念
+## 核心概念
 
-### 定图纸 (需求)
-- 定义用户故事和验收标准
-- 规划开发阶段
-- 创建 SPEC-REQUIREMENTS.md
+### SDD 状态机
 
-### 打地基 (架构)
-- 评估技术选型
-- 设计系统架构
-- 创建 SPEC-ARCHITECTURE.md
+```
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+              │              │              │        │
+        spec-workflow     implementation    unified-workflow
+```
 
-### 立规矩 (实现)
-- 小步迭代
-- 门禁检查推进
-- 收敛到 PRD/ARCH/PROJECT
+### 4 个 Gate
 
-### 自我认知 (Self-Awareness)
-VIBE-SDD 通过统一上下文追踪赋予 AI"自知之明"：
-- **Context Tracker** — 知道/推断/假设/不知 + 信号 + 信心度
+| Gate | 名称 | 检查内容 |
+|------|------|---------|
+| Gate 0 | 需求完整性 | SPEC-REQUIREMENTS.md 完整性 |
+| Gate 1 | 架构完整性 | SPEC-ARCHITECTURE.md 完整性 |
+| Gate 2 | 代码对齐 | 代码与 SPEC 一致性 |
+| Gate 3 | 测试覆盖 | 测试覆盖率验证 |
+
+### 宪法规则
+
+定义在 `.vic-sdd/constitution.yaml`：
+
+| 规则 | 描述 |
+|------|------|
+| `SPEC-FIRST` | 更改功能时先更新 SPEC |
+| `SPEC-ALIGNED` | 代码必须匹配 SPEC |
+| `GATE-BEFORE-COMMIT` | 提交前必须通过所有 Gate |
+| `NO-TODO-IN-CODE` | 禁止 TODO/FIXME 注释 |
+| `NO-CONSOLE-IN-PROD` | 禁止生产环境 console.log |
+| `TESTS-REQUIRED` | 新功能必须有测试 |
 
 ## AI 快速开始
 
 当 AI 在这个项目上开始工作时，请按以下顺序阅读：
 
 ```
-1. .vic-sdd/agent-prompt.md      → 工作流概览（会话开始时显示）
-2. .vic-sdd/PROJECT.md            → 项目状态、里程碑
+1. AGENTS.md                  → 入口点，Skills 概览
+2. .vic-sdd/PROJECT.md        → 项目状态、里程碑
 3. .vic-sdd/SPEC-REQUIREMENTS.md → 需求、验收标准
 4. .vic-sdd/SPEC-ARCHITECTURE.md → 架构、技术栈
 ```
 
 **结果**: AI 能在约 15 秒内理解项目上下文。
 
-## Skills 参考（10 个核心 Skills）
+## Pre-commit 钩子
 
-| 类别 | Skill | 用途 |
-|------|-------|------|
-| 自我认知 | `context-tracker` | 统一：知道/推断/假设/不知 + 信号 |
-| Vibe | `requirements` | 用户故事、验收标准 |
-| Vibe | `architecture` | 技术选型、系统设计 |
-| Vibe | `design-review` | 设计系统、AI Slop 检测 |
-| Vibe | `debugging` | 根因分析 (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
-| QA | `qa` | TDD、测试覆盖、E2E |
-| SDD | `sdd-orchestrator` | 状态机、Gate 执行 |
-| SDD | `spec-architect` | 将需求凝固为合约 |
-| SDD | `spec-contract-diff` | 检测规范漂移 |
-| SDD | `spec-traceability` | 故事→合约→代码→测试追溯 |
-
-## Gate 强制执行
-
-### 自动 Gate 检查
+配置在 `.pre-commit-config.yaml`：
 
 ```bash
-# 声称"完成"前运行
-vic spec gate 0   # 验证 SPEC-REQUIREMENTS.md 结构
-vic spec gate 1   # 验证 SPEC-ARCHITECTURE.md 结构
-vic spec gate 2   # 检查代码与规范对齐
-vic spec gate 3   # 验证测试覆盖
+pre-commit install
+pre-commit run --all-files
 ```
 
-### Pre-commit 钩子
-
-`.pre-commit-config.yaml` 包含 `vic gate check --blocking`，在 Gate 通过前阻止提交。
-
-### 阶段推进
-
-```bash
-vic phase advance --to 1  # 先自动运行所有必需的 Gate
-```
-
-## 典型工作流
-
-| 场景 | 命令 |
-|------|------|
-| 开始新项目 | `vic init` |
-| 检查需求 | `vic spec gate 0` |
-| 检查架构 | `vic spec gate 1` |
-| 检查代码对齐 | `vic spec gate 2` |
-| 检查测试覆盖 | `vic spec gate 3` |
-| 推进阶段 | `vic phase advance --to N` |
-| Pre-commit 检查 | `vic gate check --blocking` |
+包含的钩子：
+- `vic-gate-check`: 在 Gate 通过前阻止提交
+- `vic-spec-drift`: 检测代码与 SPEC 的漂移
 
 ## 安装
 
@@ -192,12 +189,42 @@ vic phase advance --to 1  # 先自动运行所有必需的 Gate
 cd cmd/vic-go
 make build
 
-# 添加到 PATH
-sudo ln -s $(pwd)/vic /usr/local/bin/vic
+# 安装到 PATH
+make install
 
-# 或者使用 Go
-go install github.com/vic-sdd/vic@latest
+# 直接运行
+make run ARGS="--help"
 ```
+
+## 构建命令
+
+```bash
+cd cmd/vic-go
+
+# 构建当前平台
+make build
+
+# 构建所有平台
+make build-all
+
+# 运行测试
+make test
+
+# 安装到 PATH
+make install
+
+# 带参数运行
+make run ARGS="--help"
+```
+
+## 环境变量
+
+| 变量 | 默认值 | 描述 |
+|------|--------|------|
+| `VIC_DIR` | `.vic-sdd` | VIC 目录名 |
+| `VIC_PROJECT_DIR` | 当前目录 | 项目目录 |
+| `VIC_OUTPUT` | `plain` | 输出格式 (json/yaml/plain) |
+| `VIC_VERBOSE` | `false` | 详细输出 |
 
 ## 许可证
 

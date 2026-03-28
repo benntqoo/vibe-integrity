@@ -1,54 +1,62 @@
-# Vibe Coding 工作流对比：Superpowers vs gstack vs GSD-2
+# Vibe Coding 工作流完整对比：Superpowers vs gstack vs GSD-2 vs VIC-SDD
 
 ## 一、共同的 Vibe Coding 工作流特性
 
-尽管这三个项目的技术架构和使用形态不同，但它们在 vibe coding（氛围编程）工作流上存在显著的共性。这些共性代表了 AI 辅助开发的最佳实践。
+尽管这四个项目的技术架构和使用形态不同，但它们在 vibe coding（氛围编程）工作流上存在显著的共性。这些共性代表了 AI 辅助开发的最佳实践。
 
 ### 1.1 需求理解 → 产品思维
 
-所有三个系统都强调在写代码之前先理解「为什么」，而非「做什么」。
+所有四个系统都强调在写代码之前先理解「为什么」，而非「做什么」。
 
 **Superpowers** 通过 **brainstorming** 技能实现。AI 不会直接开始写代码，而是通过结构化对话理解用户的真实需求。即使是看似简单的任务，也必须经过「设计阶段」，这基于一个核心认知：「未经验证的假设在最简单的项目中造成最大的浪费」。
 
-**gstack** 的 **/plan-ceo-review** 进一步强化了这一理念。Garry Tan 将其称为「Brian Chesky 模式」—— AI 不仅要理解用户「说要什么」，还要帮助用户发现他们「真正需要什么」。当用户说「让卖家上传照片」时，AI 会质疑：这真的是产品吗？真正的功能可能是「帮助卖家创建一个能卖出去的东西」，从而引导出完全不同的产品设计。
+**gstack** 的 **/plan-ceo-review** 进一步强化了这一理念。Garry Tan 将其称为「Brian Chesky 模式」—— AI 不仅要理解用户「说要什么」，还要帮助用户发现他们「真正需要什么」。
 
 **GSD-2** 通过 **Research** 阶段实现。在每个切片（Slice）开始前，系统会研究代码库和相关文档，确保在开始实现前对项目有充分的理解。
 
-**共同价值：** 在 vibe coding 中，用户往往用模糊的自然语言描述需求。这三个系统都强制 AI 在实现前进行需求澄清，避免「用户说 A，AI 做成 B」的常见问题。
+**VIC-SDD** 通过 **定图纸** 阶段实现。系统使用 vibe-think skill 进行需求澄清，创建 SPEC-REQUIREMENTS.md 文档，包含用户故事、验收标准和 Phase 规划。
+
+**共同价值：** 在 vibe coding 中，用户往往用模糊的自然语言描述需求。这四个系统都强制 AI 在实现前进行需求澄清，避免「用户说 A，AI 做成 B」的常见问题。
 
 ### 1.2 任务规划 → 分解与验证
 
-三个系统都认为详细的规划是成功的基础。
+四个系统都认为详细的规划是成功的基础。
 
-**Superpowers** 的 **writing-plans** 要求生成的计划足够详细，以至于一个「缺乏上下文但技术熟练的初级工程师」也能执行。每个任务被分解为 2-5 分钟的原子步骤，包含精确的文件路径、完整代码和验证命令。
+**Superpowers** 的 **writing-plans** 要求生成的计划足够详细。每个任务被分解为 2-5 分钟的原子步骤，包含精确的文件路径、完整代码和验证命令。
 
-**gstack** 有两个专门的规划技能：**/plan-eng-review** 负责技术架构设计，强制 AI 绘制系统图（架构图、状态图、数据流图）来暴露隐藏的假设；**/plan-design-review** 负责设计审查，填补大多数计划「描述后端功能但从不指定用户实际看到什么」的空白。
+**gstack** 有两个专门的规划技能：**/plan-eng-review** 负责技术架构设计，强制 AI 绘制系统图；**/plan-design-review** 负责设计审查。
 
-**GSD-2** 将规划分为两层：Slice 层面分解为多个任务（Task），每个任务必须适合一个上下文窗口。任务包含 must-haves——可机械验证的结果，包括 Truths（可观察行为）、Artifacts（必须存在的文件）、Key Links（导入和连接）。
+**GSD-2** 将规划分为两层：Slice 层面分解为多个任务（Task），每个任务必须适合一个上下文窗口。任务包含 must-haves——可机械验证的结果。
+
+**VIC-SDD** 使用 **打地基** 阶段。通过 vibe-architect skill 创建 SPEC-ARCHITECTURE.md，包含技术选型、模块划分、API 设计。每个功能都有明确的 Gate 检查点。
 
 **共同价值：** 详细的规划不仅让执行更可控，也让审查和验证更容易。在 vibe coding 中，AI 容易「跑偏」，详细的规划提供了纠正的锚点。
 
 ### 1.3 验证 → 证据驱动
 
-三个系统都强调「没有验证就不能声称成功」。
+四个系统都强调「没有验证就不能声称成功」。
 
-**Superpowers** 的 **verification-before-completion** 制定了铁律：任何完成声明必须伴随新鲜的验证证据。AI 不能使用「应该」「可能」「看起来」这类词汇，必须实际运行验证命令并展示输出。
+**Superpowers** 的 **verification-before-completion** 制定了铁律：任何完成声明必须伴随新鲜的验证证据。
 
-**gstack** 的 **/review** 寻找那些「能通过 CI 但在生产中仍然会出问题」的 bug—— N+1 查询、竞态条件、信任边界问题、遗漏的枚举处理器等。同时 **/qa** 提供端到端测试能力。
+**gstack** 的 **/review** 寻找那些「能通过 CI 但在生产中仍然会出问题」的 bug。同时 **/qa** 提供端到端测试能力。
 
-**GSD-2** 的验证系统分为层级：静态检查 → 命令执行 → 行为测试 → 人工审查。配置 `verification_commands` 后，系统会在每个任务自动运行 lint/test，并支持自动修复重试。
+**GSD-2** 的验证系统分为层级：静态检查 → 命令执行 → 行为测试 → 人工审查。配置 `verification_commands` 后，系统会在每个任务自动运行。
 
-**共同价值：** AI 容易对自己的工作过度自信。这三个系统都强制 AI 独立验证其输出，而非依赖「应该没问题」的假设。
+**VIC-SDD** 通过 **vic check** 和 **vic validate** 命令实现代码对齐检查。每个 Gate 有明确的验收标准矩阵。
+
+**共同价值：** AI 容易对自己的工作过度自信。这四个系统都强制 AI 独立验证其输出，而非依赖「应该没问题」的假设。
 
 ### 1.4 审查 → 质量门禁
 
-三个系统都设置了多层次的质量审查。
+四个系统都设置了多层次的质量审查。
 
-**Superpowers** 有完整的代码审查流程：两阶段审查（规范合规性 → 代码质量），requesting-code-review 在任务间触发，receiving-code-review 指导如何响应反馈。
+**Superpowers** 有完整的代码审查流程：两阶段审查（规范合规性 → 代码质量），requesting-code-review 在任务间触发。
 
-**gstack** 的 **/review** 由「偏执的高级工程师」模式运行，会追踪每个新增的枚举值通过所有 switch 语句，会发现「通过 CI 但会爆炸于生产」的 bug。
+**gstack** 的 **/review** 由「偏执的高级工程师」模式运行，会追踪每个新增的枚举值通过所有 switch 语句。
 
-**GSD-2** 在所有切片完成后运行 `validate-milestone` 门控，比较路线图成功标准与实际结果，然后才封存里程碑。
+**GSD-2** 在所有切片完成后运行 `validate-milestone` 门控，比较路线图成功标准与实际结果。
+
+**VIC-SDD** 使用 Gate 检查系统：Gate 0（需求完整性）、Gate 1（架构完整性）、Gate 2（代码对齐）、Gate 3（测试覆盖）。
 
 **共同价值：** 在 vibe coding 中，AI 可能在不了解代码库复杂性的情况下写出「能工作但有隐患」的代码。审查流程提供了额外的安全网。
 
@@ -60,15 +68,13 @@
 
 #### 2.1.1 TDD 强制循环
 
-Superpowers 的 **test-driven-development** 技能是 vibe coding 中的独特存在。它强制 AI 遵循红-绿-重构循环：先写失败的测试，运行确认失败，编写最小代码使其通过，运行确认通过，最后提交。
-
-这在 vibe coding 中尤其重要，因为 AI 倾向于「直接写实现」而非「先写测试」。TDD 强制 AI 在写代码前思考「如何验证这会工作」。
+Superpowers 的 **test-driven-development** 技能是 vibe coding 中的独特存在。它强制 AI 遵循红-绿-重构循环。
 
 #### 2.1.2 系统化调试方法论
 
 **systematic-debugging** 技能提供四阶段调试流程：根因调查 → 模式分析 → 假设与测试 → 实现修复。
 
-关键约束：如果已尝试三个以上的修复但都失败，AI 必须停下来质疑架构本身而非继续打补丁。这防止了在根本架构问题上进行无效的循环修复。
+关键约束：如果已尝试三个以上的修复但都失败，AI 必须停下来质疑架构本身而非继续打补丁。
 
 #### 2.1.3 硬性门槛机制
 
@@ -78,73 +84,38 @@ Superpowers 设置了多个不可绕过的硬性门槛：
 - **TDD 门槛**：测试不通过就不能写实现
 - **verification 门槛**：没有验证证据就不能声称完成
 
-这些门槛构成了质量防线的最后堡垒。
-
----
-
 ### 2.2 gstack 独特流程
 
 #### 2.2.1 产品重塑四模式
 
 **/plan-ceo-review** 的独特之处在于其四工作模式：
 
-- **SCOPE EXPANSION**：AI 热情推荐雄心勃勃的版本，每个扩展作为单独决策供用户选择
-- **SELECTIVE EXPANSION**：以当前范围为基线，中立地呈现机会，用户选择要追求哪些
-- **HOLD SCOPE**：严格审查现有计划，不呈现任何扩展
+- **SCOPE EXPANSION**：热情推荐雄心勃勃的版本
+- **SELECTIVE EXPANSION**：中立地呈现机会
+- **HOLD SCOPE**：严格审查现有计划
 - **SCOPE REDUCTION**：找到最小可行版本
-
-这允许 vibe coding 会话根据用户需求灵活调整——有时需要扩张，有时需要收缩，有时需要专注。
 
 #### 2.2.2 设计系统从零构建
 
-**/design-consultation** 是 gstack 独有的能力。当项目还没有设计系统（字体、颜色、布局）时，AI 可以从零开始构建完整的设计系统。
-
-独特价值：AI 不仅选择「安全」的选择，还提出「创意风险」—— 那些让产品脱颖而出的大胆决策。例如在都是蓝色点缀的开发者工具中使用青色点缀。
+**/design-consultation** 是 gstack 独有的能力。当项目还没有设计系统时，AI 可以从零开始构建完整的设计系统。
 
 #### 2.2.3 AI 垃圾检测
 
-**/plan-design-review** 和 **/design-review** 包含 80 项设计审计，特别关注「AI 垃圾」模式——那些让设计看起来像 AI 生成的反模式：
-
-- 渐变英雄区
-- 三栏图标网格
-- 统一的圆角
-
-这在 vibe coding 中很重要，因为 AI 生成的代码往往带有可识别的「AI 风格」，需要主动避免。
+**/plan-design-review** 和 **/design-review** 包含 80 项设计审计，特别关注「AI 垃圾」模式。
 
 #### 2.2.4 真正的浏览器自动化
 
 gstack 的 **/browse** 和 **/qa** 技能提供了真正的端到端测试能力。
 
-在 vibe coding 中，AI 写的代码可能在「功能」层面工作，但在真实浏览器中会有 UI 问题。gstack 让 AI 能够：打开真实浏览器、操作页面元素、验证 UI 状态、测试表单和交互、检测 JavaScript 错误。
+#### 2.2.5 工程回顾
 
-这是 vibe coding 的游戏改变者——AI 不再「半盲」，它真的能「看到」UI。
-
-#### 2.2.5 实时视觉审查与修复
-
-**/design-review** 可以在实时网站上运行 80 项视觉审计，然后进入修复循环：每个发现都被追踪到源文件，进行最小的 CSS 更改，提交原子提交，验证并拍摄前后对比。
-
-#### 2.2.6 工程回顾
-
-**/retro** 每周分析提交历史、工作模式和发货速度，提供团队级别的回顾报告。在 vibe coding 中，这种回顾特别有价值，因为它帮助理解 AI 的实际贡献。
-
----
+**/retro** 每周分析提交历史，提供团队级别的回顾报告。
 
 ### 2.3 GSD-2 独特流程
 
 #### 2.3.1 状态机驱动的自主执行
 
-GSD-2 的 **/gsd auto** 是最独特的流程——它是一个完全由磁盘文件驱动的状态机。
-
-工作方式：
-
-1. 读取 `.gsd/STATE.md`
-2. 确定下一个工作单元
-3. 创建新鲜的代理会话
-4. 注入预加载的上下文
-5. 让 LLM 执行
-6. 完成后读取磁盘状态，重复
-
-关键价值：在 vibe coding 中，用户可以「设置后离开」。不需要坐在那里盯着 AI 工作。GSD-2 可以自主运行数小时，用户回来时项目已经完成。
+GSD-2 的 **/gsd auto** 是最独特的流程——完全由磁盘文件驱动的状态机。用户可以「设置后离开」。
 
 #### 2.3.2 里程碑与切片层次
 
@@ -154,37 +125,98 @@ GSD-2 的工作层次是独特的：
 - **Slice（切片）**：一个可演示的垂直能力，包含 1-7 个任务
 - **Task（任务）**：适合一个上下文窗口的工作单元
 
-这提供了其他系统没有的结构化程度——用户知道自己在构建一个「可发运的版本」，而不只是一堆代码。
-
 #### 2.3.3 Git Worktree 隔离
 
-每个里程碑在独立的 Git worktree 中运行 (`milestone/<MID>` 分支)，所有切片按顺序提交。当里程碑完成时，被 squash-merge 到 main 作为一次干净的提交。
+每个里程碑在独立的 Git worktree 中运行。
 
-在 vibe coding 中，这确保了：没有分支切换、没有合并冲突、Git 历史干净、每个里程碑可独立回滚。
+#### 2.3.4 崩溃恢复 + 成本追踪
 
-#### 2.3.4 崩溃恢复
+GSD-2 的状态持久化到磁盘，使得真正的崩溃恢复和完整成本追踪成为可能。
 
-GSD-2 的状态持久化到磁盘，使得真正的崩溃恢复成为可能。如果会话死亡，下一个 `/gsd auto` 会：读取幸存的状态文件、合成恢复简报（从每个到达磁盘的工具调用）、恢复完整上下文。
+### 2.4 VIC-SDD 独特流程
 
-这在长时间运行的 vibe coding 会话中至关重要——不需要因为一次崩溃而重新开始。
+#### 2.4.1 三阶段命名体系
 
-#### 2.3.5 自适应重新规划
+VIC-SDD 最大的独特之处在于使用中国软件开发中常见的三阶段命名：
 
-每个切片完成后，GSD-2 重新评估路线图。如果工作揭示了改变计划的新信息，切片会被重新排序、添加或删除，然后继续。
+- **定图纸 (Requirements)**：需求澄清和凝固
+- **打地基 (Architecture)**：技术架构设计
+- **立规矩 (Implementation)**：代码实现和验证
 
-这允许 vibe coding 会话保持灵活性——当学到新东西时，计划可以调整。
+这种命名方式更符合中文开发团队的直觉，也体现了「先想清楚再做」的理念。
 
-#### 2.3.6 完整成本追踪
+#### 2.4.2 Gate 检查点系统
 
-GSD-2 追踪每个单元的 token 使用量和成本，按阶段、切片和模型细分。提供：运行总数、预测、预算上限控制。
+VIC-SDD 实现了完整的 Gate 检查机制：
 
-在 vibe coding 中，这特别有价值，因为它帮助理解「用 AI 构建这个功能实际花了多少钱」。
+| Gate | 名称 | 功能 |
+|------|------|------|
+| Gate 0 | 需求完整性 | 检查 SPEC-REQUIREMENTS.md 的完整性 |
+| Gate 1 | 架构完整性 | 检查 SPEC-ARCHITECTURE.md 的完整性 |
+| Gate 2 | 代码对齐 | 检查实现是否符合 SPEC 设计 |
+| Gate 3 | 测试覆盖 | 检查测试是否覆盖关键路径 |
 
-#### 2.3.7 技能生命周期管理
+每个 Gate 都有明确的验收标准矩阵。
 
-GSD-2 追踪技能表现：使用次数、成功率、Token 趋势、上次使用时间。自动标记：陈旧技能（超过 N 天未使用）、成功率下降、技能 Token 使用增加。
+#### 2.4.3 状态持久化
 
-这帮助维护技能库的质量——在 vibe coding 中，技能是 AI 能力的延伸。
+VIC-SDD 的 `.vic-sdd/` 目录结构提供了完整的项目记忆：
+
+```
+.vic-sdd/
+├── SPEC-REQUIREMENTS.md    # 需求规范
+├── SPEC-ARCHITECTURE.md    # 架构规范
+├── PROJECT.md              # 项目状态追踪
+├── status/
+│   ├── events.yaml        # 事件历史
+│   ├── state.yaml         # 当前状态
+│   ├── gate-status.yaml   # Gate 状态
+│   └── progress.yaml      # 进度追踪
+├── tech/
+│   └── tech-records.yaml  # 技术决策记录
+├── risk-zones.yaml        # 风险区域
+├── project.yaml           # AI 快速参考
+└── dependency-graph.yaml  # 模块依赖图
+```
+
+#### 2.4.4 CLI 工具驱动
+
+VIC-SDD 提供完整的 CLI 工具（vic 命令）来驱动整个流程：
+
+```bash
+vic init                      # 初始化项目
+vic spec init                 # 初始化 SPEC 文档
+vic rt / vic record tech      # 记录技术决策
+vic rr / vic record risk     # 记录风险
+vic status                   # 显示项目状态
+vic spec gate [0-3]          # 运行 Gate 检查
+vic check                    # 代码对齐检查
+vic validate                 # 完整验证
+vic phase advance            # 推进阶段
+```
+
+#### 2.4.5 单入口编排器
+
+VIC-SDD 的 **sdd-orchestrator** skill 是整个系统的单一入口控制器：
+
+```
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+```
+
+所有其他 SDD skills 必须通过编排器调用，确保严格的状态转换和审计追踪。
+
+#### 2.4.6 AI 快速理解机制
+
+VIC-SDD 设计了一套 AI 快速理解机制：当 AI 开始项目时，只需读取以下文件即可快速理解项目上下文：
+
+```
+1. .vic-sdd/PROJECT.md          → 项目状态、里程碑
+2. .vic-sdd/SPEC-REQUIREMENTS.md → 需求、验收标准
+3. .vic-sdd/SPEC-ARCHITECTURE.md → 架构、技术栈
+4. .vic-sdd/risk-zones.yaml    → 高风险区域
+```
+
+这使得 AI 能在约 15 秒内理解项目背景。
 
 ---
 
@@ -201,13 +233,10 @@ gstack:
 
 GSD-2:
 需求 → Research → 理解代码库 → 研究外部文档 → 知识整合
+
+VIC-SDD:
+需求 → 定图纸 (vibe-think) → SPEC-REQUIREMENTS.md → Gate 0 检查
 ```
-
-**差异分析：**
-
-- Superpowers 强调「不跳过设计」
-- gstack 强调「重塑产品，找到10星」
-- GSD-2 强调「研究，理解上下文」
 
 ### 3.2 规划阶段
 
@@ -221,13 +250,10 @@ gstack:
 
 GSD-2:
 研究 → Plan阶段 → Slice分解 → Task列表 → 每个Task有must-haves
+
+VIC-SDD:
+SPEC → 打地基 (vibe-architect) → SPEC-ARCHITECTURE.md → Gate 1 检查
 ```
-
-**差异分析：**
-
-- Superpowers 专注于「可执行的任务」
-- gstack 分离技术审查和设计审查
-- GSD-2 有严格的层次结构
 
 ### 3.3 执行阶段
 
@@ -240,13 +266,10 @@ gstack:
 
 GSD-2:
 Task → 新鲜上下文 → 执行 → verification_commands → 摘要 → 下一Task
+
+VIC-SDD:
+SPEC → 代码生成 (spec-to-codebase) → 代码 → spec-contract-diff 检查
 ```
-
-**差异分析：**
-
-- Superpowers 使用子代理
-- gstack 依赖用户的 AI 会话
-- GSD-2 每个任务有新上下文（防止积累）
 
 ### 3.4 验证阶段
 
@@ -262,35 +285,33 @@ GSD-2:
 → 验证层级 (静态→命令→行为→人工)
 → verification_commands 自动运行
 → 失败自动修复重试
+
+VIC-SDD:
+→ vic check → 代码对齐检查
+→ vic validate → 完整验证
+→ Gate 2 (代码对齐) + Gate 3 (测试覆盖)
 ```
-
-**差异分析：**
-
-- Superpowers 强调「证据驱动」
-- gstack 有真正的浏览器测试
-- GSD-2 有自动化验证流水线
 
 ### 3.5 审查阶段
 
 ```
 Superpowers:
 → requesting-code-review → 计划合规 → 报告问题
-→ receiving-code-review → 响应反馈
 
 gstack:
-→ /review → 追踪枚举值 → 自动修复明显问题 → 升级模糊问题
+→ /review → 追踪枚举值 → 自动修复 → 升级模糊问题
 → /design-review → 80项审计 → 修复循环 → 前后截图
 
 GSD-2:
 → 每Task后 → 代码质量
 → 所有Slice后 → validate-milestone → 比较成功标准vs实际结果
+
+VIC-SDD:
+→ vic spec gate 0 → 需求完整性
+→ vic spec gate 1 → 架构完整性
+→ vic spec gate 2 → 代码对齐
+→ vic spec gate 3 → 测试覆盖
 ```
-
-**差异分析：**
-
-- Superpowers 有完整的审查循环
-- gstack 强调「生产会爆炸」的问题
-- GSD-2 有里程碑级别的验证门控
 
 ### 3.6 发布阶段
 
@@ -304,13 +325,12 @@ gstack:
 GSD-2:
 → Slice N完成 → 摘要 → 提交
 → 所有Slice完成 → validate-milestone → squash merge → worktree清理
+
+VIC-SDD:
+→ vic phase advance → 推进到下一阶段
+→ vic spec merge → 合并到 PRD/ARCH/PROJECT
+→ sdd-release-guard → 发布守卫检查
 ```
-
-**差异分析：**
-
-- Superpowers 是「收尾」
-- gstack 是「发布机器」
-- GSD-2 有完整的里程碑交付流程
 
 ---
 
@@ -318,75 +338,72 @@ GSD-2:
 
 ### 4.1 简单功能实现
 
-| 阶段 | Superpowers | gstack | GSD-2 |
-|------|-------------|--------|-------|
-| 需求 | brainstorming (强制) | /plan-ceo-review (快速) | Research |
-| 规划 | writing-plans | /plan-eng-review | Task分解 |
-| 执行 | 子代理 | 用户会话 | 新鲜上下文 |
-| 验证 | verification | /qa | auto |
-| 审查 | 代码审查 | /review | 里程碑门控 |
-
-**适用性：**
-
-- Superpowers：适合需要严格流程的项目
-- gstack：适合需要产品思维的项目
-- GSD-2：适合需要自主运行的项目
+| 阶段 | Superpowers | gstack | GSD-2 | VIC-SDD |
+|------|-------------|--------|-------|---------|
+| 需求 | brainstorming (强制) | /plan-ceo-review (快速) | Research | 定图纸 (vibe-think) |
+| 规划 | writing-plans | /plan-eng-review | Task分解 | 打地基 (vibe-architect) |
+| 执行 | 子代理 | 用户会话 | 新鲜上下文 | 代码生成 (spec-to-codebase) |
+| 验证 | verification | /qa | auto | vic check |
+| 审查 | 代码审查 | /review | 里程碑门控 | Gate 0-3 |
+| 发布 | 分支完成 | /ship | worktree merge | vic phase advance |
 
 ### 4.2 复杂系统设计
 
-| 阶段 | Superpowers | gstack | GSD-2 |
-|------|-------------|--------|-------|
-| 产品 | brainstorming | /plan-ceo-review + 四模式 | Research + 重估 |
-| 架构 | - | /plan-eng-review + 图表 | Plan → Slice |
-| 设计 | - | /design-consultation + /design-review | - |
-| 验证 | verification | /review + /qa | milestone validation |
-| 交付 | 分支完成 | /ship | worktree merge |
-
-**适用性：**
-
-- gstack 在复杂设计上有明显优势
-- GSD-2 在自主执行上有明显优势
-- Superpowers 在流程纪律上有优势
+| 阶段 | Superpowers | gstack | GSD-2 | VIC-SDD |
+|------|-------------|--------|-------|---------|
+| 产品 | brainstorming | /plan-ceo-review + 四模式 | Research + 重估 | 定图纸 |
+| 架构 | - | /plan-eng-review + 图表 | Plan → Slice | 打地基 + SPEC |
+| 设计 | - | /design-consultation + /design-review | - | - |
+| 验证 | verification | /review + /qa | milestone validation | Gate 2-3 |
+| 交付 | 分支完成 | /ship | worktree merge | vic spec merge |
 
 ### 4.3 长时间自主开发
 
-| 能力 | Superpowers | gstack | GSD-2 |
-|------|-------------|--------|-------|
-| 多会话 | 需要手动 | 需要手动 | 磁盘状态持久化 |
-| 崩溃恢复 | 无 | 无 | ✅ 完整恢复 |
-| 成本追踪 | 无 | 无 | ✅ 完整追踪 |
-| 自主运行 | 部分 | 部分 | ✅ 完全自主 |
-| 进度可视化 | - | dashboard | overlay |
+| 能力 | Superpowers | gstack | GSD-2 | VIC-SDD |
+|------|-------------|--------|-------|---------|
+| 多会话 | 需要手动 | 需要手动 | 磁盘状态持久化 | 状态文件持久化 |
+| 崩溃恢复 | 无 | 无 | ✅ 完整恢复 | ✅ 状态恢复 |
+| 成本追踪 | 无 | 无 | ✅ 完整追踪 | 有限 |
+| 自主运行 | 部分 | 部分 | ✅ 完全自主 | 部分 |
+| 进度可视化 | - | dashboard | overlay | vic status |
 
-**适用性：**
+### 4.4 团队协作
 
-- GSD-2 明显适合长时间/大规模项目
-- gstack 适合需要产品思维的中等规模项目
-- Superpowers 适合需要严格流程的项目
+| 能力 | Superpowers | gstack | GSD-2 | VIC-SDD |
+|------|-------------|--------|-------|---------|
+| 多用户 | - | - | ✅ unique IDs | ✅ 团队追踪 |
+| 角色分工 | - | - | Team mode | AI 快速理解 |
+| 决策记录 | - | - | - | ✅ tech-records.yaml |
+| 风险记录 | - | - | - | ✅ risk-zones.yaml |
+| 依赖追踪 | - | - | - | ✅ dependency-graph.yaml |
 
 ---
 
-## 五、总结：Vibe Coding 工作流的本质差异
+## 五、核心差异总结
 
 ### 5.1 核心理念差异
 
 **Superpowers = 纪律优先**
 
-核心理念：即使在 vibe coding 中，也要遵循软件工程的最佳实践。TDD、系统化调试、验证驱动——这些不是建议，而是强制。AI 可以很快，但不应该潦草。
+核心理念：即使在 vibe coding 中，也要遵循软件工程的最佳实践。TDD，系统化调试、验证驱动——这些不是建议，而是强制。
 
 **gstack = 产品思维优先**
 
-核心理念：vibe coding 的目标不是写代码，而是构建产品。AI 首先要问「什么是真正产品」，然后用「10星产品」的标准来重新设计。代码只是实现产品愿景的工具。
+核心理念：vibe coding 的目标不是写代码，而是构建产品。AI 首先要问「什么是真正产品」，然后用「10星产品」的标准来重新设计。
 
 **GSD-2 = 自主优先**
 
-核心理念：vibe coding 应该是「设置后离开」。状态机驱动的执行、崩溃恢复、成本追踪——这些让 AI 能够长时间自主工作，而不需要用户持续干预。
+核心理念：vibe coding 应该是「设置后离开」。状态机驱动的执行、崩溃恢复、成本追踪——这些让 AI 能够长时间自主工作。
+
+**VIC-SDD = 结构化优先**
+
+核心理念：vibe coding 需要结构化的护栏。Gate 检查、状态转换、决策记录——这些确保 AI 不会迷失在「 vibes」中。SPEC 文档是唯一的真实来源。
 
 ### 5.2 用户参与度
 
-- **Superpowers**：用户全程参与，每个阶段都需要批准
-- **gstack**：用户引导方向，AI 执行细节，但需要调用命令
-- **GSD-2**：用户设置目标，AI 自主执行，可完全离开
+```
+Superpowers: 用户全程参与 ←→ gstack: 用户引导方向 ←→ GSD-2: 设置后离开 ←→ VIC-SDD: 阶段门控驱动
+```
 
 ### 5.3 适用场景
 
@@ -398,16 +415,63 @@ GSD-2:
 | 需要端到端测试 | gstack |
 | 长时间自主开发 | GSD-2 |
 | 大型里程碑交付 | GSD-2 |
-| 严格流程要求 | Superpowers |
+| 严格流程要求 | Superpowers 或 VIC-SDD |
 | 成本敏感项目 | GSD-2 |
+| 需要团队协作 | VIC-SDD |
+| 需要决策追溯 | VIC-SDD |
+| 需要 AI 快速理解项目 | VIC-SDD |
 
 ### 5.4 可以互补
 
-这三个系统不是互斥的——它们的独特流程可以互补：
+这四个系统不是互斥的——它们的独特流程可以互补：
 
 - 使用 **gstack** 的 /plan-ceo-review 进行产品重塑
 - 使用 **Superpowers** 的 TDD 和验证流程
+- 使用 **VIC-SDD** 的 SPEC 文档化和 Gate 检查
 - 使用 **GSD-2** 的自主执行和里程碑管理
 - 使用 **gstack** 的 /qa 进行最终浏览器测试
 
-理想情况下，一个完整的 vibe coding 工作流可以结合这三个系统的最佳特性。
+理想情况下，一个完整的 vibe coding 工作流可以结合这四个系统的最佳特性。
+
+---
+
+## 六、详细功能对比矩阵
+
+| 功能 | Superpowers | gstack | GSD-2 | VIC-SDD |
+|------|-------------|--------|-------|---------|
+| **需求理解** | | | | |
+| 强制设计阶段 | ✅ brainstorming | ✅ /plan-ceo-review | ✅ Research | ✅ 定图纸 |
+| 产品思维 | 基础 | ✅ 四模式重塑 | 基础 | 基础 |
+| 外部研究 | - | - | ✅ Researcher | - |
+| **规划** | | | | |
+| 任务分解 | ✅ writing-plans | ✅ /plan-eng-review | ✅ Slice → Task | ✅ 打地基 |
+| 技术架构图 | - | ✅ 强制图表 | - | ✅ SPEC |
+| 设计审查 | - | ✅ 80项审计 | - | - |
+| **执行** | | | | |
+| 子代理执行 | ✅ subagent | - | ✅ Worker | - |
+| 新鲜上下文 | - | - | ✅ 每Task | - |
+| TDD 强制 | ✅ 红-绿-重构 | - | - | - |
+| 浏览器自动化 | - | ✅ /browse + /qa | - | - |
+| **验证** | | | | |
+| 验证命令 | ✅ verification | ✅ /review + /qa | ✅ verification | ✅ vic check |
+| 证据驱动 | ✅ 铁律 | ✅ 完整 | ✅ 自动 | ✅ Gate |
+| 自动化测试 | - | ✅ /qa | ✅ auto | - |
+| **审查** | | | | |
+| 代码审查 | ✅ 两阶段 | ✅ 生产级bug | 里程碑级 | ✅ Gate 2 |
+| 视觉审查 | - | ✅ /design-review | - | - |
+| **发布** | | | | |
+| 发布命令 | ✅ /ship | ✅ /ship | ✅ /gsd auto | ✅ vic phase |
+| Git 策略 | 基础 | 基础 | ✅ Worktree | - |
+| **系统特性** | | | | |
+| 状态持久化 | 会话 | 会话 | ✅ 磁盘 | ✅ .vic-sdd/ |
+| 崩溃恢复 | - | - | ✅ 完整 | ✅ 状态恢复 |
+| 成本追踪 | - | - | ✅ 完整 | 有限 |
+| 自主运行 | 有限 | 有限 | ✅ 完全 | 有限 |
+| **团队协作** | | | | |
+| 决策记录 | - | - | ✅ DECISIONS.md | ✅ tech-records.yaml |
+| 风险记录 | - | - | - | ✅ risk-zones.yaml |
+| 依赖追踪 | - | - | - | ✅ dependency-graph.yaml |
+| 团队模式 | - | - | ✅ | ✅ |
+| **CLI 工具** | - | - | ✅ gsd CLI | ✅ vic CLI |
+| Gate 检查 | - | - | ✅ milestone | ✅ vic spec gate |
+| AI 快速理解 | - | - | - | ✅ project.yaml |

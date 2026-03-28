@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(node:*)",
+      "Bash(taskkill:*)",
+      "Bash(find:*)",
+      "mcp__web-search-prime__web_search_prime",
+      "mcp__web-reader__webReader"
+    ]
+  }
+}

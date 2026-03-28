@@ -30,6 +30,9 @@ vic phase advance --to 1
 # Record decisions
 vic rt --id DB-001 --title "Use PostgreSQL" --decision "Primary database"
 vic rr --id RISK-001 --area auth --desc "JWT not validated"
+
+# Semantic search (requires embedding)
+vic ask "how does authentication work?"
 ```
 
 ## Commands
@@ -37,179 +40,148 @@ vic rr --id RISK-001 --area auth --desc "JWT not validated"
 | Command | Description |
 |---------|-------------|
 | `vic init` | Initialize .vic-sdd/ |
+| `vic status` | Show project status |
 | `vic spec init` | Initialize SPEC documents |
 | `vic spec status` | Show SPEC status |
-| `vic spec gate [0-3\|1.5]` | Run Gate checks (validation) |
+| `vic spec gate [0-3]` | Run Gate checks (validation) |
 | `vic spec hash` | Check SPEC hashes and detect changes |
-| `vic spec watch` | Monitor SPEC changes and auto-run drift detection |
 | `vic spec diff` | Detect SPEC changes since last check |
-| `vic spec changes` | Show SPEC change history |
 | `vic phase advance` | Advance phase (auto-validates gates) |
 | `vic gate check --blocking` | Pre-commit hook check |
-| `vic rt` | Record technical decision |
-| `vic rr` | Record risk |
+| `vic rt` / `vic record tech` | Record technical decision |
+| `vic rr` / `vic record risk` | Record risk |
 | `vic check` | Check code alignment |
 | `vic validate` | Full validation |
+| `vic ask <query>` | Semantic search about codebase |
 
-See [cmd/vic-go/README.md](./cmd/vic-go/README.md) for full documentation.
+See [docs/VIC-CLI-GUIDE.md](./docs/VIC-CLI-GUIDE.md) for full documentation.
 
 ## Development Workflow
 
 ```
-定图纸 (Requirements)     打地基 (Architecture)    立规矩 (Implementation)
-        │                          │                         │
-   requirements             architecture             sdd-orchestrator
-        │                          │                         │
-        ▼                          ▼                         ▼
-SPEC-REQUIREMENTS.md  ──▶  SPEC-ARCHITECTURE.md  ──▶  Implementation
-        │                          │                         │
-        ▼                          ▼                         ▼
-   Gate 0                    Gate 1                  Gate 2 + 3
-(Requirements)          (Architecture)           (Code + Tests)
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+    │         │            │             │        │          │
+    └─────────┴────────────┘             └────────┴──────────┘
+         spec-workflow                        implementation
+                                              unified-workflow
 ```
+
+### 5 Core Skills
+
+| Skill | Auto-Activate | Responsibility |
+|-------|---------------|----------------|
+| `context-tracker` | ✅ Yes | AI self-awareness, confidence tracking |
+| `spec-workflow` | No | Requirements → Architecture → SPEC freezing |
+| `implementation` | No | Code/debugging/testing/SPEC alignment |
+| `unified-workflow` | No | SDD orchestration/Constitution/traceability |
+| `quick` | No | Simple single-file changes |
 
 ## Directory Structure
 
 ```
 project/
 ├── cmd/vic-go/                 # Go CLI (compiled, fast)
-│   ├── internal/
-│   │   └── commands/          # Gate implementations
-│   │       ├── gate0.go       # Requirements validation
-│   │       ├── gate1.go       # Architecture validation
-│   │       ├── gate2.go       # Code alignment check
-│   │       ├── gate3.go       # Test coverage check
-│   │       └── ...
-│   └── README.md
+│   ├── main.go
+│   └── internal/
+│       ├── commands/           # CLI command implementations
+│       │   ├── root.go
+│       │   ├── spec.go
+│       │   ├── gate.go
+│       │   ├── gate0-3.go      # Gate implementations
+│       │   └── ...
+│       ├── config/             # Configuration (Viper)
+│       ├── checker/            # Code alignment checking
+│       ├── types/              # Type definitions
+│       └── embedding/          # Semantic search with embeddings
+│           ├── store.go        # SQLite vector store
+│           ├── embedder.go     # Embedding generation
+│           └── chunker/        # Code chunking by language
 │
-├── skills/                     # 10 core skills (simplified from 19)
-│   ├── context-tracker/      # Self-awareness (4→1)
-│   ├── requirements/          # Requirements (2→1)
-│   ├── architecture/          # Tech architecture
-│   ├── design-review/         # Design system
-│   ├── debugging/            # Debug (2→1)
-│   ├── qa/                    # Testing (3→1)
-│   ├── sdd-orchestrator/      # SDD pipeline
-│   ├── spec-architect/        # Spec contracts
-│   ├── spec-contract-diff/     # Drift detection
-│   └── spec-traceability/     # Traceability
+├── skills/                     # 5 core skills
+│   ├── context-tracker/        # Self-awareness (auto-activate)
+│   ├── spec-workflow/          # Requirements/Architecture/SPEC
+│   ├── implementation/         # Code/Debug/Test
+│   ├── unified-workflow/       # SDD orchestration
+│   └── quick/                  # Simple changes
 │
-├── docs/                      # Documentation
-├── .vic-sdd/                  # Project memory
+├── docs/                       # Documentation
+│   ├── VIC-CLI-GUIDE.md        # CLI reference
+│   ├── SDD-PROCESS-CN.md       # SDD process (Chinese)
+│   ├── INTELLIGENT_JUDGMENT_DESIGN.md
+│   └── ...
+│
+├── .vic-sdd/                   # Project memory
 │   ├── SPEC-REQUIREMENTS.md    # Requirements
 │   ├── SPEC-ARCHITECTURE.md    # Architecture
 │   ├── PROJECT.md              # Status
-│   ├── agent-prompt.md        # AI workflow prompt
-│   ├── context.yaml            # Unified context
+│   ├── constitution.yaml       # Unbreakable rules
+│   ├── context.yaml            # AI self-awareness state
+│   ├── agent-prompt.md         # AI workflow prompt
 │   └── status/
+│       ├── spec-hash.json      # SPEC file hashes
 │       ├── gate-status.yaml    # Gate check status
-│       ├── spec-hash.json      # SPEC file hashes for change detection
-│       └── change-log.yaml     # SPEC change history
-└── .pre-commit-config.yaml    # Gate enforcement
+│       └── state.yaml          # System state
+│
+└── .pre-commit-config.yaml     # Gate enforcement
 ```
 
 ## Core Concepts
 
-### 定图纸 (Requirements)
-- Define user stories and acceptance criteria
-- Plan development phases
-- Create SPEC-REQUIREMENTS.md
+### SDD State Machine
 
-### 打地基 (Architecture)
-- Evaluate technology options
-- Design system architecture
-- Create SPEC-ARCHITECTURE.md
+```
+Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
+              │              │              │        │
+        spec-workflow     implementation    unified-workflow
+```
 
-### 立规矩 (Implementation)
-- Small iteration cycles
-- Gate checks before progression
-- Merge to PRD/ARCH/PROJECT
+### 4 Gates
 
-### 自我认知 (Self-Awareness)
-VIBE-SDD gives AI "self-awareness" through unified context tracking:
-- **Context Tracker** — knows/infers/assumes/unknown + signals + confidence
+| Gate | Name | Checks |
+|------|------|--------|
+| Gate 0 | Requirements | SPEC-REQUIREMENTS.md completeness |
+| Gate 1 | Architecture | SPEC-ARCHITECTURE.md completeness |
+| Gate 2 | Code | Code alignment with SPEC |
+| Gate 3 | Tests | Test coverage verification |
+
+### Constitution Rules
+
+Defined in `.vic-sdd/constitution.yaml`:
+
+| Rule | Description |
+|------|-------------|
+| `SPEC-FIRST` | Update SPEC before changing code |
+| `SPEC-ALIGNED` | Code must match SPEC |
+| `GATE-BEFORE-COMMIT` | All gates must pass before commit |
+| `NO-TODO-IN-CODE` | No TODO/FIXME comments |
+| `NO-CONSOLE-IN-PROD` | No console.log in production |
+| `TESTS-REQUIRED` | New features must have tests |
 
 ## AI Quick Start
 
 When AI starts on this project, read in order:
 
 ```
-1. .vic-sdd/agent-prompt.md    → Workflow overview (displayed at session start)
-2. .vic-sdd/PROJECT.md         → Project status, milestones
+1. AGENTS.md                  → Entry point, skills overview
+2. .vic-sdd/PROJECT.md        → Project status, milestones
 3. .vic-sdd/SPEC-REQUIREMENTS.md → Requirements, acceptance criteria
 4. .vic-sdd/SPEC-ARCHITECTURE.md → Architecture, tech stack
 ```
 
 **Result**: AI understands project context in ~15 seconds.
 
-## Skills Reference (10 Core Skills)
+## Pre-commit Hooks
 
-| Category | Skill | Purpose |
-|----------|-------|---------|
-| Self-Awareness | `context-tracker` | Unified: known/inferred/assumed/unknown + signals |
-| Vibe | `requirements` | User stories, acceptance criteria |
-| Vibe | `architecture` | Tech selection, system design |
-| Vibe | `design-review` | Design system, AI slop detection |
-| Vibe | `debugging` | Root cause analysis (SURVEY→PATTERN→HYPOTHESIS→IMPLEMENT) |
-| QA | `qa` | TDD, test coverage, E2E |
-| SDD | `sdd-orchestrator` | State machine, gate enforcement |
-| SDD | `spec-architect` | Freeze requirements into contracts |
-| SDD | `spec-contract-diff` | Detect spec drift |
-| SDD | `spec-traceability` | Story→contract→code→test mapping |
-
-## Gate Enforcement
-
-### Automatic Gate Checks
+Pre-commit is configured in `.pre-commit-config.yaml`:
 
 ```bash
-# Run before claiming "done"
-vic spec gate 0   # Validates SPEC-REQUIREMENTS.md structure
-vic spec gate 1   # Validates SPEC-ARCHITECTURE.md structure
-vic spec gate 1.5 # Validates DESIGN.md completeness (optional)
-vic spec gate 2   # Checks code vs SPEC alignment
-vic spec gate 3   # Validates test coverage
+pre-commit install
+pre-commit run --all-files
 ```
 
-### SPEC Change Detection
-
-```bash
-# Start monitoring SPEC files for changes
-vic spec watch     # Detects changes + auto-runs Gate 2 drift check
-
-# Compare current SPEC with last known state
-vic spec diff      # Show what changed
-
-# View change history
-vic spec changes   # Show all recorded changes
-```
-
-Changes are logged to `.vic-sdd/status/change-log.yaml` with:
-- Change type (tech_stack, api, module, security)
-- Impact level (high, medium, low)
-- Review status tracking
-
-### Pre-commit Hook
-
-`.pre-commit-config.yaml` includes `vic gate check --blocking` to prevent commits until gates pass.
-
-### Phase Advance
-
-```bash
-vic phase advance --to 1  # Auto-runs all required gates first
-```
-
-## Workflow
-
-| Scenario | Command |
-|----------|---------|
-| Start new project | `vic init` |
-| Check requirements | `vic spec gate 0` |
-| Check architecture | `vic spec gate 1` |
-| Monitor SPEC changes | `vic spec watch` |
-| Check code alignment | `vic spec gate 2` |
-| Check test coverage | `vic spec gate 3` |
-| Advance phase | `vic phase advance --to N` |
-| Pre-commit check | `vic gate check --blocking` |
+Hooks include:
+- `vic-gate-check`: Blocks commits until gates pass
+- `vic-spec-drift`: Detects code drift from SPEC
 
 ## Installation
 
@@ -219,11 +191,41 @@ cd cmd/vic-go
 make build
 
 # Install to PATH
-sudo ln -s $(pwd)/vic /usr/local/bin/vic
+make install
 
-# Or use Go
-go install github.com/vic-sdd/vic@latest
+# Or run directly
+make run ARGS="--help"
 ```
+
+## Build Commands
+
+```bash
+cd cmd/vic-go
+
+# Build for current platform
+make build
+
+# Build for all platforms
+make build-all
+
+# Run tests
+make test
+
+# Install to PATH
+make install
+
+# Run locally with arguments
+make run ARGS="--help"
+```
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VIC_DIR` | `.vic-sdd` | VIC directory name |
+| `VIC_PROJECT_DIR` | current dir | Project directory |
+| `VIC_OUTPUT` | `plain` | Output format (json/yaml/plain) |
+| `VIC_VERBOSE` | `false` | Verbose output |
 
 ## License
 

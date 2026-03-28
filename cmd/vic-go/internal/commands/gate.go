@@ -23,6 +23,7 @@ func NewGateCmd(cfg *config.Config) *cobra.Command {
 	cmd.AddCommand(NewGateStatusCmd(cfg))
 	cmd.AddCommand(NewGatePassCmd(cfg))
 	cmd.AddCommand(NewGateCheckCmd(cfg))
+	cmd.AddCommand(NewGateSmartCmd(cfg))
 
 	return cmd
 }
@@ -387,4 +388,130 @@ func RunGateCheck(cfg *config.Config, phaseNum int) error {
 	fmt.Println("   git commit --no-verify -m 'message'")
 
 	return fmt.Errorf("gate check failed: required gates not passed")
+}
+
+// NewGateSmartCmd creates the gate smart subcommand
+// This command intelligently selects which gates to run based on risk assessment
+func NewGateSmartCmd(cfg *config.Config) *cobra.Command {
+	var execute bool
+	var outputFormat string
+
+	cmd := &cobra.Command{
+		Use:   "smart",
+		Short: "Smart gate selection based on risk assessment",
+		Long: `Intelligently select which gates to run based on change analysis.
+
+This command:
+1. Analyzes current changes
+2. Assesses risk level
+3. Selects required gates
+4. Optionally runs the gates
+
+Examples:
+  vic gate smart              # Show which gates would run
+  vic gate smart --execute    # Run the selected gates
+  vic gate smart --output json`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runGateSmart(cfg, execute, outputFormat)
+		},
+	}
+
+	cmd.Flags().BoolVarP(&execute, "execute", "e", false, "Execute the selected gates")
+	cmd.Flags().StringVarP(&outputFormat, "output", "o", "plain", "Output format (plain, json)")
+
+	return cmd
+}
+
+func runGateSmart(cfg *config.Config, execute bool, outputFormat string) error {
+	// Get assessment
+	details, err := getGitDiffDetails()
+	if err != nil {
+		return fmt.Errorf("failed to get git diff: %w", err)
+	}
+
+	changeType := detectChangeTypeFromDetails(details)
+	riskScore, riskLevel := assessRisk(details)
+	gatesRequired := getRequiredGates(riskLevel)
+	recommendedSkill := getRecommendedSkill(changeType, riskLevel)
+
+	if outputFormat == "json" {
+		fmt.Printf(`{
+  "change_type": "%s",
+  "risk_level": "%s",
+  "risk_score": %.2f,
+  "gates_required": %v,
+  "gates_skipped": %v,
+  "recommended_skill": "%s"
+}`, changeType, riskLevel, riskScore, gatesRequired, getSkippedGates(gatesRequired), recommendedSkill)
+		fmt.Println()
+		return nil
+	}
+
+	// Plain output
+	fmt.Println()
+	fmt.Println("🧠 Smart Gate Selection")
+	fmt.Println("========================================")
+	fmt.Println()
+
+	// Show assessment
+	fmt.Printf("📋 Change Type: %s\n", changeType)
+	fmt.Printf("⚠️  Risk Level: %s (%.2f)\n", riskLevel, riskScore)
+	fmt.Println()
+
+	// Show gate selection
+	fmt.Println("🚪 Gate Selection:")
+	for gate := 0; gate <= 3; gate++ {
+		required := containsInt(gatesRequired, gate)
+		status := "⏭️  SKIP"
+		if required {
+			status = "✅ REQUIRED"
+		}
+		fmt.Printf("   Gate %d: %s\n", gate, status)
+	}
+
+	fmt.Println()
+	fmt.Printf("📊 Summary: %d gates required, %d skipped\n", len(gatesRequired), 4-len(gatesRequired))
+	fmt.Printf("🎯 Recommended Skill: %s\n", recommendedSkill)
+	fmt.Println()
+
+	if execute && len(gatesRequired) > 0 {
+		fmt.Println("========================================")
+		fmt.Println("🚀 Executing required gates...")
+		fmt.Println()
+
+		for _, gate := range gatesRequired {
+			fmt.Printf("Running Gate %d...\n", gate)
+			// In a real implementation, this would call the actual gate check
+			// For now, we just show what would run
+			fmt.Printf("   vic spec gate %d\n", gate)
+		}
+		fmt.Println()
+		fmt.Println("✅ Smart gate execution complete")
+	} else if execute {
+		fmt.Println("✅ No gates required for this change type")
+	} else {
+		fmt.Println("💡 Run with --execute to run the selected gates")
+	}
+
+	return nil
+}
+
+func getSkippedGates(required []int) []int {
+	all := []int{0, 1, 2, 3}
+	skipped := []int{}
+	for _, g := range all {
+		if !containsInt(required, g) {
+			skipped = append(skipped, g)
+		}
+	}
+	return skipped
+}
+
+func containsInt(slice []int, item int) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }

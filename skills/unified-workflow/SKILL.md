@@ -111,49 +111,35 @@ Single controller for SDD workflow, Constitution enforcement, and traceability t
 
 ## Vic Commands
 
-此 Skill 激活时，按以下场景调用 vic 命令：
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Start autonomous mode | `vic auto start` | Start autonomous development |
+| View status | `vic auto status` | Monitor autonomous mode progress, token consumption |
+| Pause | `vic auto pause` | Temporarily stop autonomous mode |
+| Resume | `vic auto resume` | Resume from paused state |
+| Stop | `vic auto stop` | End autonomous mode session |
 
-### 自主模式
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Advance phase | `vic phase advance --to <N>` | Advance from current phase to next (auto-runs Gates) |
+| View project status | `vic status` | Check current project status and SDD phase |
 
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 启动自主模式 | `vic auto start` | 开始 autonomous 开发 |
-| 查看状态 | `vic auto status` | 监控自主模式进度、Token 消耗 |
-| 暂停 | `vic auto pause` | 临时停止自主模式 |
-| 恢复 | `vic auto resume` | 从暂停状态恢复 |
-| 停止 | `vic auto stop` | 结束自主模式会话 |
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Blocking check (required) | `vic gate check --blocking` | **Must run before commit**, all blocking items must be zero |
+| SPEC hash | `vic spec hash` | Detect if SPEC has changed, cannot commit if changed |
+| Constitution summary | `vic cost status` | Confirm cost is within budget |
 
-### 阶段推进
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| View project status | `vic status` | Confirm project status and milestones |
+| Trace chain | `vic history --limit 10` | Verify User Story → SPEC → Code → Test chain |
+| Export data | `vic export --output backup.json` | Backup vic-sdd data before delivery |
 
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 推进阶段 | `vic phase advance --to <N>` | 从当前阶段推进到下一阶段（自动跑 Gate） |
-| 查看当前阶段 | `vic phase show` | 确认当前 SDD 阶段 |
+## L3: References
 
-### 提交前检查（强制）
-
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 阻断性检查 (必须) | `vic gate check --blocking` | **提交前必跑**，所有 blocking 项必须清零 |
-| SPEC Hash | `vic spec hash` | 检测 SPEC 是否变更，变更则不能提交 |
-| Constitution 摘要 | `vic cost status` | 确认成本在预算内 |
-
-### 功能交付 / Traceability
-
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 查看里程碑 | `vic milestone list` | 确认交付在哪个里程碑 |
-| 追溯链路 | `vic history --limit 10` | 验证 User Story → SPEC → Code → Test 链路 |
-| 导出数据 | `vic export --output backup.json` | 交付前备份 vic-sdd 数据 |
-
-## L3: References (Required Reading)
-
-These references are part of the skill, not optional:
-
-### Required (Always Read)
-- `references/unified-workflow-guide.md` - Complete usage guide
-
-### Optional (Read if Needed)
-- `references/sdd-state-machine.md` - SDD state machine details
-- `references/constitution-rules.md` - Constitution rule definitions
-- `references/traceability-patterns.md` - Traceability patterns
+- references/
+  - `unified-workflow-guide.md` - Complete usage guide
+  - `sdd-state-machine.md` - SDD state machine details
+  - `constitution-rules.md` - Constitution rule definitions
+  - `traceability-patterns.md` - Traceability patterns

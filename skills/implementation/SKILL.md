@@ -120,53 +120,39 @@ Handles the complete implementation lifecycle from coding to testing to SPEC ali
 
 ## Vic Commands
 
-此 Skill 激活时，按以下场景调用 vic 命令：
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Start TDD | `vic tdd start --feature "<feature>"` | Start TDD workflow |
+| RED phase | `vic tdd red --test "<test>"` | Write failing test |
+| GREEN phase | `vic tdd green --test "<test>" --passed` | Mark test as passed |
+| Refactor | `vic tdd refactor` | Refactoring phase |
+| TDD status | `vic tdd status` | View current TDD status |
 
-### 代码实现 (TDD)
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Check alignment (required) | `vic spec gate 2` | **Must run after each implementation**, Gate 2 verification |
+| Check tests | `vic spec gate 3` | Verify test coverage after implementation |
+| Tech stack check | `vic check` | Verify actual tech stack matches decision records |
+| Dependency impact | `vic deps impact <module>` | View impact scope before changes |
+| Module dependencies | `vic deps list` | Understand module dependency structure |
 
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 开始 TDD | `vic tdd start --feature "<feature>"` | 启动 TDD 工作流 |
-| 红阶段 | `vic tdd red --test "<test>"` | 写失败测试 |
-| 绿阶段 | `vic tdd green --test "<test>" --passed` | 测试通过后标记 |
-| 重构 | `vic tdd refactor` | 重构阶段 |
-| TDD 状态 | `vic tdd status` | 查看当前 TDD 状态 |
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Start debugging | `vic debug start --problem "<description>"` | Start 4-phase debugging process |
+| Evidence collection | `vic debug survey` | Debug Step 1: Collect evidence |
+| Pattern recognition | `vic debug pattern` | Debug Step 2: Find similar issues |
+| Hypothesis verification | `vic debug hypothesis --explain "<explanation>"` | Debug Step 3: Verify root cause hypothesis |
+| Implement fix | `vic debug implement --fix "<fix>" --root-cause "<root cause>"` | Debug Step 4: Implement fix |
 
-### 代码验证
+| Scenario | Command | When to Use |
+|----------|---------|-------------|
+| Check AI Slop | `vic slop scan` | Scan for AI-generated low-quality code patterns |
+| Fix Slop | `vic slop fix --dry-run=false` | Apply automatic fixes (preview before execution) |
 
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 检查对齐 (必须) | `vic spec gate 2` | **每次实现完成必跑**，Gate 2 验证 |
-| 检查测试 | `vic spec gate 3` | 实现后验证测试覆盖率 |
-| 技术选型检查 | `vic check` | 验证实际技术栈与决策记录一致 |
-| 依赖影响 | `vic deps impact <module>` | 修改前查看影响范围 |
-| 模块依赖 | `vic deps list` | 了解模块依赖结构 |
+## L3: References
 
-### Bug 调试 (Systematic Debugging)
-
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 开始调试 | `vic debug start --problem "<描述>"` | 启动 4 阶段调试流程 |
-| 证据收集 | `vic debug survey` | 调试 Step 1：收集证据 |
-| 模式识别 | `vic debug pattern` | 调试 Step 2：寻找相似问题 |
-| 假设验证 | `vic debug hypothesis --explain "<解释>"` | 调试 Step 3：验证根因假设 |
-| 实施修复 | `vic debug implement --fix "<修复>" --root-cause "<根因>"` | 调试 Step 4：实施修复 |
-
-### 实施完成
-
-| 场景 | 命令 | 何时用 |
-|------|------|-------|
-| 检查 AI Slop | `vic slop scan` | 清理 AI 生成的低质量代码模式 |
-| 修复 Slop | `vic slop fix --dry-run=false` | 应用自动修复（预览后再执行） |
-
-## L3: References (Required Reading)
-
-These references are part of the skill, not optional:
-
-### Required (Always Read)
-- `references/implementation-guide.md` - Complete usage guide
-
-### Optional (Read if Needed)
-- `references/tdd-guide.md` - TDD workflow details
-- `references/debugging-guide.md` - Systematic debugging methodology
-- `references/troubleshooting.md` - Common issues and fixes
+- references/
+  - `implementation-guide.md` - Complete usage guide
+  - `tdd-guide.md` - TDD workflow details
+  - `debugging-guide.md` - Systematic debugging methodology
+  - `troubleshooting.md` - Common issues and fixes

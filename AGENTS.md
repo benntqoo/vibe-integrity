@@ -7,175 +7,175 @@
 
 ## 系统状态
 
-| 特性 | 状态 |
-|------|------|
-| 结构化开发 | ✅ .vic-sdd/ SPEC 工作流 |
-| AI 自我认知 | ✅ context-tracker (auto_activate) |
-| Gate 检查 | ✅ vic spec gate 0-3 |
-| 规范约束 | ✅ constitution.yaml |
-| 技能系统 | ✅ 5 Skills (Google Cloud Agent Skills 规范) |
+| Feature | Status |
+|---------|--------|
+| Structured Development | ✅ .vic-sdd/ SPEC workflow |
+| AI Self-Awareness | ✅ context-tracker (auto_activate) |
+| Gate Checks | ✅ vic spec gate 0-3 |
+| Constitution Rules | ✅ constitution.yaml |
+| Skills System | ✅ 5 Skills (Google Cloud Agent Skills spec) |
 
 ---
 
-## 技能一览 (5 个核心)
+## Skills Overview (5 Core Skills)
 
-| Skill | 何时激活 | 职责 |
-|-------|---------|------|
-| **`context-tracker`** | **每次会话开始 + 每个行动后 + 会话结束** | AI 自我认知、信心度追踪、Blocker 识别 |
-| **`spec-workflow`** | 需求模糊 / 架构设计 / SPEC 创建 | 需求分析 → 架构设计 → SPEC 冻结 |
-| **`implementation`** | 代码实现 / Bug 修复 / 测试 / SPEC 对齐 | TDD 红绿重构、系统调试、Gate 2/3 检查 |
-| **`unified-workflow`** | 功能交付 / 阶段推进 / 提交前 / 追溯检查 | SDD 状态机、Constitution 执行、Traceability |
-| **`quick`** | 简单单文件改动（不涉及 SPEC） | Typo 修复、变量重命名、简单注释 |
+| Skill | When to Activate | Responsibility |
+|-------|-----------------|----------------|
+| **`context-tracker`** | **Every session start + after each action + session end** | AI self-awareness, confidence tracking, blocker identification |
+| **`spec-workflow`** | Vague requirements / architecture design / SPEC creation | Requirements analysis → architecture design → SPEC freezing |
+| **`implementation`** | Code implementation / bug fix / testing / SPEC alignment | TDD red-green-refactor, systematic debugging, Gate 2/3 checks |
+| **`unified-workflow`** | Feature delivery / phase advancement / pre-commit / traceability | SDD state machine, constitution enforcement, traceability |
+| **`quick`** | Simple single-file changes (no SPEC impact) | Typo fixes, variable renaming, simple comments |
 
 ---
 
-## 决策树：何时用哪个技能？
+## Decision Tree: Which Skill to Use?
 
 ```
-AI 进入项目 → 确认上下文 → 执行工作 → 收尾
+AI enters project → confirm context → execute work → wrap up
 
-Step 1: 确认上下文 (context-tracker, auto_activate)
+Step 1: Confirm context (context-tracker, auto_activate)
   → vic status
   → vic spec status
   → vic spec hash
   → vic gate check --blocking
-  → 查看 .vic-sdd/ 状态文件
-  (详细 → skills/context-tracker/SKILL.md)
+  → Check .vic-sdd/ state files
+  (details → skills/context-tracker/SKILL.md)
 
-Step 2: 判断任务类型
+Step 2: Determine task type
   │
-  ├─ 🤔 需求模糊 / 架构未设计 / 需要 SPEC
+  ├─ 🤔 Vague requirements / undesign architecture / need SPEC
   │   └─→ spec-workflow
-  │       (详细 → skills/spec-workflow/SKILL.md)
+  │       (details → skills/spec-workflow/SKILL.md)
   │
-  ├─ 💻 代码实现 / Bug 修复 / 写测试 / 检查对齐
+  ├─ 💻 Code implementation / bug fix / write tests / check alignment
   │   └─→ implementation
-  │       (详细 → skills/implementation/SKILL.md)
+  │       (details → skills/implementation/SKILL.md)
   │
-  ├─ 🚀 功能交付 / 阶段推进 / 提交前 / 追溯
+  ├─ 🚀 Feature delivery / phase advancement / pre-commit / traceability
   │   └─→ unified-workflow
-  │       (详细 → skills/unified-workflow/SKILL.md)
+  │       (details → skills/unified-workflow/SKILL.md)
   │
-  └─ 🔧 简单改动（单文件、无 SPEC 影响）
+  └─ 🔧 Simple changes (single file, no SPEC impact)
       └─→ quick
-          (详细 → skills/quick/SKILL.md)
+          (details → skills/quick/SKILL.md)
 ```
 
 ---
 
-## 规划前置命令（项目启动 / 规划需求前必看）
+## Pre-work Commands (Project startup / planning requirements)
 
-> **这些是 AI 在开始任何实质性工作前应该先运行的命令。**
-> **详细命令说明和参数 → 各 SKILL.md**
+> **These commands should be run before any substantive work begins.**
+> **Detailed command descriptions and parameters → each SKILL.md**
 
-### 会话开始（每次对话第一件事）
+### Session Start (First thing in every conversation)
 
 ```bash
-vic status                              # 项目整体状态
-vic spec status                         # SPEC 文档状态
-vic spec hash                           # 检查 SPEC 是否变更
-vic gate check --blocking               # 所有 Gate 状态（阻断性问题）
+vic status                              # Overall project status
+vic spec status                         # SPEC document status
+vic spec hash                           # Check if SPEC has changed
+vic gate check --blocking               # All Gate status (blocking issues)
 ```
 
-### 规划阶段（开始设计或澄清需求前）
+### Planning Phase (Before starting design or requirement clarification)
 
 ```bash
-vic spec list                           # 列出所有 SPEC 文档
-vic spec show                           # 显示 SPEC 概要
-vic milestone list                       # 项目里程碑
-vic task list                           # 剩余任务（如果有）
+vic spec list                           # List all SPEC documents
+vic spec show                           # Show SPEC summary
+vic milestone list                       # Project milestones
+vic task list                           # Remaining tasks (if any)
 ```
 
-### 状态查询（随时可用）
+### Status Query (Available anytime)
 
 ```bash
-vic history --limit 10                  # 最近事件
-vic search <关键词>                     # 搜索技术决策和风险
-vic deps list                           # 模块依赖概览
-vic cost status                         # Token/费用追踪
+vic history --limit 10                  # Recent events
+vic search <keyword>                     # Search technical decisions and risks
+vic deps list                           # Module dependency overview
+vic cost status                         # Token/cost tracking
 ```
 
 ---
 
-## SDD 状态机
+## SDD State Machine
 
 ```
 Ideation → Explore → SpecCheckpoint → Build → Verify → ReleaseReady → Released
     │         │            │             │        │          │            │
     ▼         ▼            ▼             ▼        ▼          ▼            ▼
 spec-workflow                   implementation              unified-workflow
-                               (Gate 2: 代码对齐)            (Gate 3: 测试覆盖)
-                               (Gate 3: 测试覆盖)            (最终交付检查)
+                               (Gate 2: Code alignment)      (Gate 3: Test coverage)
+                               (Gate 3: Test coverage)      (Final delivery check)
 ```
 
 ---
 
-## 质量红线（不可违反）
+## Quality Rules (Must Not Violate)
 
-详见 `skills/context-tracker/SKILL.md` 和 `.vic-sdd/constitution.yaml`
+See `skills/context-tracker/SKILL.md` and `.vic-sdd/constitution.yaml`
 
-| 规则 ID | 说明 | 触发 |
-|---------|------|------|
-| `SPEC-FIRST` | 改功能必须先改 SPEC | implementation |
-| `SPEC-ALIGNED` | 代码必须对齐 SPEC | Gate 2 |
-| `NO-TODO-IN-CODE` | 代码禁止 TODO/FIXME | Gate 0 |
-| `NO-CONSOLE-IN-PROD` | 生产代码禁止 console.log | 提交前 |
-| `GATE-BEFORE-COMMIT` | 提交前必须过 Gate | unified-workflow |
-| `TESTS-REQUIRED` | 新功能必须有测试 | implementation |
-| `SELF-AWARENESS` | 每步行动后更新 context | context-tracker |
+| Rule ID | Description | Trigger |
+|---------|-------------|---------|
+| `SPEC-FIRST` | Must change SPEC before changing code | implementation |
+| `SPEC-ALIGNED` | Code must align with SPEC | Gate 2 |
+| `NO-TODO-IN-CODE` | Code禁止 TODO/FIXME | Gate 0 |
+| `NO-CONSOLE-IN-PROD` | No console.log in production code | Pre-commit |
+| `GATE-BEFORE-COMMIT` | Must pass Gates before commit | unified-workflow |
+| `TESTS-REQUIRED` | New features must have tests | implementation |
+| `SELF-AWARENESS` | Update context after each action | context-tracker |
 
 ---
 
-## 信心度（context-tracker 自动计算）
+## Confidence (Automatically calculated by context-tracker)
 
 ```
 confidence = (positive - warnings×0.3 - blockers×0.5) / max_signals
 
-> 0.7    → 🟢 HIGH   → 继续
-0.4-0.7  → 🟡 MODERATE → 继续，关注警告
-< 0.4    → 🔴 LOW   → 暂停，解决阻塞
-blockers >= 2 → 🛑 STOP → 停止，等待人类
+> 0.7    → 🟢 HIGH   → Continue
+0.4-0.7  → 🟡 MODERATE → Continue, monitor warnings
+< 0.4    → 🔴 LOW   → Pause, resolve blockers
+blockers >= 2 → 🛑 STOP → Stop, ask human
 ```
 
 ---
 
-## 目录结构（AI 必读文件）
+## Directory Structure (AI Must-Read Files)
 
 ```
 .vic-sdd/
-├── SPEC-REQUIREMENTS.md    # 需求规范（先读）
-├── SPEC-ARCHITECTURE.md    # 架构规范（先读）
-├── PROJECT.md               # 项目状态追踪
-├── constitution.yaml        # 不可违反规则（先读）
-├── context.yaml            # AI 自我认知状态（context-tracker 维护）
-├── agent-prompt.md         # AI 工作流提示（含强制检查清单）
+├── SPEC-REQUIREMENTS.md    # Requirements spec (read first)
+├── SPEC-ARCHITECTURE.md    # Architecture spec (read first)
+├── PROJECT.md               # Project status tracking
+├── constitution.yaml        # Unbreakable rules (read first)
+├── context.yaml            # AI self-awareness state (maintained by context-tracker)
+├── agent-prompt.md         # AI workflow prompt (with mandatory checklists)
 └── status/
-    └── spec-hash.json      # SPEC 变更检测
+    └── spec-hash.json      # Change detection
 
 skills/
-├── context-tracker/        # AI 自我认知（auto_activate: true）
-├── spec-workflow/          # 需求/架构/SPEC 创建
-├── implementation/          # 代码/调试/测试/对齐
-├── unified-workflow/        # SDD 编排/Constitution/追溯
-└── quick/                 # 简单单文件改动
+├── context-tracker/        # AI self-awareness (auto_activate: true)
+├── spec-workflow/          # Requirements/architecture/SPEC creation
+├── implementation/          # Code/debugging/testing/alignment
+├── unified-workflow/        # SDD orchestration/constitution/traceability
+└── quick/                 # Simple single-file changes
 ```
 
 ---
 
-## 详细文档索引
+## Detailed Documentation Index
 
-| 场景 | 文档 |
-|------|------|
-| 我是谁 / 我该做什么 | AGENTS.md（此文件）|
-| 每次行动后如何更新状态 | skills/context-tracker/SKILL.md |
-| 需求模糊、架构设计、创建 SPEC | skills/spec-workflow/SKILL.md |
-| 写代码、修复 Bug、测试、对齐 SPEC | skills/implementation/SKILL.md |
-| 功能交付、阶段推进、Constitution、追溯 | skills/unified-workflow/SKILL.md |
-| 简单单文件改动 | skills/quick/SKILL.md |
-| CLI 工具完整命令参考 | docs/VIC-CLI-GUIDE.md |
+| Scenario | Document |
+|----------|----------|
+| Who I am / What I should do | AGENTS.md (this file) |
+| How to update status after each action | skills/context-tracker/SKILL.md |
+| Vague requirements, architecture design, SPEC creation | skills/spec-workflow/SKILL.md |
+| Write code, fix bugs, tests, SPEC alignment | skills/implementation/SKILL.md |
+| Feature delivery, phase advancement, constitution, traceability | skills/unified-workflow/SKILL.md |
+| Simple single-file changes | skills/quick/SKILL.md |
+| CLI tool complete command reference | docs/VIC-CLI-GUIDE.md |
 
 ---
 
-> **核心原则**：AGENTS.md 是 AI 的"入口地图"，保持简洁。
-> 详细的工作步骤、vic 命令调用链、具体参数 → 在激活对应 Skill 后加载对应 SKILL.md。
-> 这样避免上下文爆炸，同时保证每个执行步骤都有据可查。
+> **Core Principle**: AGENTS.md is the AI's "entry map" - keep it simple.
+> Detailed work steps, vic command chains, specific parameters → loaded when corresponding Skill is activated.
+> This prevents context explosion while ensuring every execution step is documented.
