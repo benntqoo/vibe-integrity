@@ -184,8 +184,11 @@ func RunGate0(cfg *config.Config, format string) error {
 
 // checkFeaturesHaveCriteria verifies features have acceptance criteria
 func checkFeaturesHaveCriteria(content string) gate0Result {
-	// Find feature list section
-	featureRe := regexp.MustCompile(`(?mi)^[-*]\s*(.+?)(?:\s*\n|$)`)
+	// Find feature list items - match both list items (- *) and numbered items (1. 1.1.)
+	// Patterns:
+	//   - List items: ^[-*]\s*(.+)$
+	//   - Numbered: ^\d+\.?\d*\.?\s*(.+)$ (matches 1., 1.1., 16.8. etc)
+	featureRe := regexp.MustCompile(`(?mi)^([-*]|\d+\.?\d*\.?)\s*(.+?)$`)
 	features := featureRe.FindAllStringSubmatch(content, -1)
 
 	if len(features) == 0 {
@@ -197,13 +200,17 @@ func checkFeaturesHaveCriteria(content string) gate0Result {
 		}
 	}
 
-	// Count features with criteria (look for "given/when/then" near feature)
+	// Count features with criteria (look for "given/when/then/acceptance" near feature)
 	criteriaRe := regexp.MustCompile(`(?i)(given|when|then|acceptance|验收)`)
 	featuresWithCriteria := 0
 
 	for _, match := range features {
-		if len(match) > 1 {
-			feature := match[1]
+		if len(match) > 2 {
+			feature := match[2] // Changed from match[1] to match[2] due to new regex groups
+			// Skip if this is an acceptance criteria item itself
+			if strings.Contains(strings.ToLower(feature), "acceptance:") {
+				continue
+			}
 			// Look in a window around the feature
 			idx := strings.Index(content, feature)
 			if idx >= 0 {
@@ -220,13 +227,30 @@ func checkFeaturesHaveCriteria(content string) gate0Result {
 		}
 	}
 
-	passRatio := float64(featuresWithCriteria) / float64(len(features))
+	totalFeatures := len(features)
+	// Skip acceptance criteria lines from total count
+	for _, match := range features {
+		if len(match) > 2 && strings.Contains(strings.ToLower(match[2]), "acceptance:") {
+			totalFeatures--
+		}
+	}
+
+	if totalFeatures == 0 {
+		return gate0Result{
+			checkID:   "FEATURES",
+			checkName: "Features Have Criteria",
+			passed:    true,
+			message:   "No features to check",
+		}
+	}
+
+	passRatio := float64(featuresWithCriteria) / float64(totalFeatures)
 	if passRatio >= 0.5 {
 		return gate0Result{
 			checkID:   "FEATURES",
 			checkName: "Features Have Criteria",
 			passed:    true,
-			message:   fmt.Sprintf("%d/%d features have acceptance criteria", featuresWithCriteria, len(features)),
+			message:   fmt.Sprintf("%d/%d features have acceptance criteria", featuresWithCriteria, totalFeatures),
 		}
 	}
 
@@ -234,7 +258,7 @@ func checkFeaturesHaveCriteria(content string) gate0Result {
 		checkID:   "FEATURES",
 		checkName: "Features Have Criteria",
 		passed:    false,
-		message:   fmt.Sprintf("Only %d/%d features have acceptance criteria - add criteria for each feature", featuresWithCriteria, len(features)),
+		message:   fmt.Sprintf("Only %d/%d features have acceptance criteria - add criteria for each feature", featuresWithCriteria, totalFeatures),
 	}
 }
 

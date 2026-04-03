@@ -35,10 +35,10 @@ phases:
                 phase: 0
     1:
         name: 架构设计
-        status: pending
-        started_at: ""
-        completed_at: ""
-        completion: 0
+        status: completed
+        started_at: "2026-04-01"
+        completed_at: "2026-04-01"
+        completion: 100
         outputs_required: []
         gates:
             gate_2:
@@ -59,10 +59,10 @@ phases:
                 phase: 1
     2:
         name: 代码实现
-        status: pending
-        started_at: ""
-        completed_at: ""
-        completion: 0
+        status: completed
+        started_at: "2026-04-01"
+        completed_at: "2026-04-01"
+        completion: 100
         outputs_required: []
         gates:
             gate_4:
