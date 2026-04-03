@@ -86,15 +86,15 @@ phases:
         status: in_progress
         started_at: "2026-04-01"
         completed_at: ""
-        completion: 0
+        completion: 50
         outputs_required: []
         gates:
             gate_6:
                 name: 功能测试通过
-                status: pending
-                checked_at: ""
-                checked_by: ""
-                notes: ""
+                status: passed
+                checked_at: "2026-04-03"
+                checked_by: sisyphus
+                notes: All tests passed with 55.1% coverage
                 description: ""
                 phase: 3
             gate_7:
